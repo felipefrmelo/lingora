@@ -13,6 +13,8 @@ from lingora.core.observability import (
 )
 from lingora.health import router
 from lingora.infrastructure.database import Database
+from lingora.integrations.auth0.verifier import Auth0TokenVerifier
+from lingora.modules.identity.http import router as identity_router
 
 
 def create_app(settings: Settings | None = None) -> FastAPI:
@@ -23,9 +25,11 @@ def create_app(settings: Settings | None = None) -> FastAPI:
 
     @asynccontextmanager
     async def lifespan(_: FastAPI) -> AsyncGenerator[None]:
-        yield
-        await database.close()
-        tracer_provider.shutdown()
+        try:
+            yield
+        finally:
+            await database.close()
+            tracer_provider.shutdown()
 
     app = FastAPI(
         title="Lingora API",
@@ -38,7 +42,9 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     )
     app.state.database = database
     app.state.settings = settings
+    app.state.token_verifier = Auth0TokenVerifier(settings)
     app.include_router(router)
+    app.include_router(identity_router)
     register_error_handlers(app)
     register_request_middleware(app, tracer_provider)
     # Outermost application middleware: error responses receive the same CORS headers.
@@ -46,7 +52,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         CORSMiddleware,
         allow_origins=settings.cors_origins,
         allow_credentials=False,
-        allow_methods=["GET"],
+        allow_methods=["GET", "POST"],
         allow_headers=["Authorization", "Content-Type"],
         expose_headers=["X-Request-ID"],
     )

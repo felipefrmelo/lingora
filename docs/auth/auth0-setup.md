@@ -1,40 +1,78 @@
-# Auth0 setup for Milestone 2
+# Auth0 authentication
 
-**Status: architecture and manual setup instructions only. No tenant was changed, no login was implemented, and no real flow has been verified.** Ordinary foundation startup and CI need no Auth0 values.
+Milestone 2 implements registration/sign-in through Universal Login, logout, and protected self-account access. Automated checks pass; the real-tenant acceptance journey is tracked in [verification](verification.md) and must pass before this milestone is complete.
 
-## Environment isolation
+## Development resources
 
-Use separate development and production tenants where practical. Record real environment-specific issuer, SPA client ID, API identifier, origins, and callback URLs in deployment configuration; do not embed tenant identifiers in application code. Use one exact issuer consistently across web and MCP identity resolution, including the trailing slash. Moving between tenant/custom-domain issuers needs an explicit identity migration.
+The existing tenant is `dev-41ngpa0fd1yfxllv.us.auth0.com`. Its dashboard is labeled **PRODUCTION** and contains other applications: Lingora uses dedicated development resources, with no changes to unrelated applications or tenant-wide login branding.
 
-## Configure the web application
+| Resource | Public identifier |
+| --- | --- |
+| Lingora Web Development (SPA) | `HRkpYwW1ZcxaA5mqq3Zc6dQKcDAkAtYe` |
+| Lingora API Development | `6aebe680b6b0539d0d4367f2` |
+| API audience | `https://lingora.local/api` |
+| Lingora-Users-Development | `con_4LXEnig2wRbDn0CD` |
+| Existing Google connection | `google-oauth2` |
 
-1. Create an Auth0 **Single Page Application** named `Lingora Web`.
-2. Enable Universal Login with Authorization Code and PKCE S256. The future frontend uses `@auth0/auth0-react`, not a hand-built OAuth client. Request `openid profile email` for identity and only the application scopes required by implemented endpoints; do not request offline access in the SPA by default.
-3. Set Allowed Callback URLs to `http://localhost:5173/auth/callback`, Allowed Logout URLs to `http://localhost:5173`, and Allowed Web Origins to `http://localhost:5173` for local development. Use that hostname consistently. Add exact HTTPS production URLs to the separate production application, not broad wildcards.
-4. Under Authentication > Social, configure the Google connection and enable it for this application. Use Google credentials stored in Auth0; configure Google's redirect URI using the callback shown by Auth0. A stable hosted environment requires your own Google provider credentials rather than relying on development keys.
-5. Populate `VITE_AUTH0_DOMAIN`, `VITE_AUTH0_CLIENT_ID`, `VITE_AUTH0_AUDIENCE`, and `VITE_AUTH0_REDIRECT_URI` in the frontend environment. These are public identifiers; never add a client secret.
+An API audience identifies a resource; it needs no hosting or DNS. Preserve the exact issuer, including its trailing slash, across web and future MCP identity resolution. Changing issuer requires an explicit identity migration. Use separate production resources and exact HTTPS URLs before deployment.
 
-## Configure the REST resource server
+## Application and API configuration
 
-1. Create an Auth0 API named `Lingora API` with a stable HTTPS identifier, for example `https://api.lingora.example`. `.example` values are documentation only and must be replaced with your own environment identifiers. An audience identifier need not be an HTTP endpoint, but it must remain stable.
-2. Select RS256 signing. Define `profile:read`, `profile:write`, `lessons:read`, `exercises:write`, `sessions:read`, `sessions:write`, and `progress:read`. The first implementation requests only the scopes its actual endpoints need.
-3. Configure grants and consent so intended learner applications can request their permitted scopes; do not grant management permissions. If using Auth0 RBAC, enable permissions in tokens as appropriate and test their actual `scope`/`permissions` contents. Dashboard permission definitions alone do not grant access or enforce ownership.
-4. Set `AUTH0_DOMAIN`, `AUTH0_ISSUER` (`https://<domain>/`), `AUTH0_API_AUDIENCE` (the exact identifier), and `AUTH0_JWKS_URL` (`https://<domain>/.well-known/jwks.json`). Pin trusted endpoints to configuration, not unverified token fields.
+The SPA uses Authorization Code with PKCE S256. Only Authorization Code is enabled; implicit, password, client credentials, and refresh-token grants are disabled. The SDK stores tokens in memory and does not request offline access. Configure:
 
-## Backend implementation requirements
+- Allowed Callback URLs: `http://localhost:5173/auth/callback`
+- Allowed Logout URLs: `http://localhost:5173`
+- Allowed Web Origins: `http://localhost:5173`
+- Connections: dedicated Lingora database and existing Google connection. Shared `Username-Password-Authentication` is disabled for Lingora.
 
-Verify signature, allowed algorithm, exact issuer, intended audience, expiration, `nbf` when present, and endpoint scopes. Missing/invalid access tokens receive 401 with a bearer challenge; valid tokens without required permission receive 403. ID tokens are not API credentials. Cache trusted JWKS, allow bounded refresh for a new key ID, and reject unknown keys if refresh fails.
+The API uses RS256, a 300-second development token lifetime, user-delegated **Per-app authorization**, and client access **No apps allowed**. Offline access and RBAC are disabled. Only `profile:read` and `profile:write` exist; grant exactly these to the Lingora SPA. Do not automatically grant future scopes. Other applications have no grant. Auth0 automatically created an unused API test application; it has no profile grant and cannot obtain client-credentials access to this API.
 
-Create a typed verified principal independent of FastAPI. Resolve `(provider='auth0', issuer, subject)` into an internal Student UUID. Provision in one transaction with database uniqueness and conflict recovery so concurrent first logins resolve one student. Do not identify or merge students by email or accept a request student ID as authorization.
+## Email verification and account linking
 
-The React SDK owns login, callback, token acquisition, expiry recovery, and logout. Keep its memory-based token-storage default. Use an allowlisted local return path after login. There is no separate registration step; missing onboarding data leads to the later onboarding workflow. Logout clears the SDK session; document access-token lifetime separately from immediate revocation assumptions.
+Deploy [require-verified-email.js](../../infra/auth0/require-verified-email.js) as a Post-Login Action named **Lingora Require Verified Email**. Set its `LINGORA_CLIENT_ID` configuration value to the public SPA ID above. Bind it without removing or reordering the existing Actions. It returns immediately for other applications, denies unverified Lingora logins with `lingora_email_verification_required`, and adds the boolean access-token claim `https://lingora.local/api/email_verified` only for verified users. The backend independently requires that claim.
 
-## Acceptance gate
+The existing shared `account linking` Action (`ad70edfd-4e5f-4aeb-b600-858dd43b1b47`) previously linked accounts by matching email. Its deployed [reviewed exclusion](../../infra/auth0/legacy-linker-exclusion.md) skips Lingora logins/database identities and excludes Lingora database identities from candidates found through other apps. Existing applications keep their previous linking behavior. Matching Google and password email addresses never cause Lingora to merge student identities. Explicit account linking is deferred.
 
-Use local signing keys and a controlled JWKS server for normal CI: valid, expired, invalid-signature, wrong issuer/audience, missing-scope, key rotation, and cross-student tests. Then use the development tenant for real login, Google login, callback, reload/session recovery, protected endpoint access, expiry, and logout tests. Record actual results and required tenant settings. Do not mark authentication complete based on mocks.
+Email/password signup and password reset use Auth0, not Lingora forms. In development, verification resends use the Auth0 dashboard; self-service resends are deferred. Users enter and submit new passwords themselves. Never copy credentials into this repository. Do not replace the existing Google provider credentials; inspect Auth0 warnings and use dedicated provider credentials before a production launch.
 
-## Sources
+## Local configuration
 
-- [Auth0 React quickstart](https://auth0.com/docs/quickstart/spa/react)
-- [Auth0 access-token validation](https://auth0.com/docs/secure/tokens/access-tokens/validate-access-tokens)
-- [Auth0 Google connection](https://auth0.com/docs/authenticate/identity-providers/social-identity-providers/google)
+Root `.env` (ignored):
+
+```dotenv
+AUTH0_DOMAIN=dev-41ngpa0fd1yfxllv.us.auth0.com
+AUTH0_ISSUER=https://dev-41ngpa0fd1yfxllv.us.auth0.com/
+AUTH0_API_AUDIENCE=https://lingora.local/api
+AUTH0_JWKS_URL=https://dev-41ngpa0fd1yfxllv.us.auth0.com/.well-known/jwks.json
+AUTH0_EMAIL_VERIFIED_CLAIM=https://lingora.local/api/email_verified
+```
+
+`apps/web/.env.local` (ignored):
+
+```dotenv
+VITE_AUTH0_DOMAIN=dev-41ngpa0fd1yfxllv.us.auth0.com
+VITE_AUTH0_CLIENT_ID=HRkpYwW1ZcxaA5mqq3Zc6dQKcDAkAtYe
+VITE_AUTH0_AUDIENCE=https://lingora.local/api
+VITE_AUTH0_REDIRECT_URI=http://localhost:5173/auth/callback
+```
+
+These are public identifiers. No SPA client secret is needed. Use `localhost`, consistently, in the browser. Run `make db-up migrate`, then `make dev-api` and `make dev-web` in separate terminals. Ordinary CI blanks frontend Auth0 values and uses test-only signing keys/mocks. No live tenant credential or runtime auth bypass is required.
+
+## Identity and authorization
+
+The API validates signature, RS256, trusted key ID, exact issuer/audience, expiration, issued-at, subject, optional `nbf`, verified-email claim, and endpoint scopes. Trusted JWKS are cached for 300 seconds, with five-second network timeout and bounded unknown-key refresh. Synchronous PyJWT/JWKS work runs outside the event loop. Token-provided key URLs are ignored. Unknown signing keys fail closed; unavailable trusted key retrieval returns 503.
+
+| Endpoint | Scope | Behavior |
+| --- | --- | --- |
+| `POST /api/v1/me/bootstrap` | `profile:write` | Provision or resolve the current student idempotently. No identity fields. |
+| `GET /api/v1/me` | `profile:read` | Retrieve the existing student; 404 before bootstrap. |
+
+Responses contain only internal UUID and creation timestamp. Provider profile information stays in the SDK. The immutable principal is independent of FastAPI. Application transactions resolve `(provider=auth0, issuer, subject)`, never email. Concurrent provisioning rolls back the losing transaction before resolving the winning identity, leaving no orphan student.
+
+Problem details distinguish invalid credentials (401), insufficient authorization (403), unprovisioned account (404), and unavailable auth configuration/key retrieval (503). Health checks remain public without Auth0 configuration. Private query data is removed on logout and SDK subject changes. Tokens attach only to protected API requests. A 401 allows one silent cache-bypassing token retry; failures requiring interaction show a sign-in control without redirect loops. Browser privacy restrictions may require interactive sign-in after a reload. Logout clears the browser session but does not revoke previously issued JWTs; expiry bounds their remaining validity.
+
+## Reference documentation
+
+- [Auth0 React SDK](https://auth0.github.io/auth0-react/)
+- [Access token validation](https://auth0.com/docs/secure/tokens/access-tokens/validate-access-tokens)
+- [Google connection](https://auth0.com/docs/authenticate/identity-providers/social-identity-providers/google)

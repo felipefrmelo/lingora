@@ -10,4 +10,4 @@
 | 6. Adaptive learning | Evidence and confidence, interpretable recommendations, versioned plans, spaced repetition, and learning dashboard. |
 | 7. Production readiness | Observability, rate limits, security/reliability review, export/deletion/retention, educational quality evaluation, pilot, and voice-session validation. |
 
-The next task after foundation is Milestone 2. Authentication is complete only after a real nonproduction Auth0 flow is verified; fixtures passing in CI are not sufficient. Likewise, MCP availability requires actual account linking and persisted session feedback. Closing voice is not pedagogical completion.
+Milestone 2 is implemented locally with automated checks passing; [live acceptance](../auth/verification.md) remains pending. Authentication is complete only after a real nonproduction Auth0 flow is verified; fixtures passing in CI are not sufficient. Likewise, MCP availability requires actual account linking and persisted session feedback. Closing voice is not pedagogical completion.

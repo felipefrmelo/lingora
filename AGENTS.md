@@ -36,12 +36,13 @@ make check                   # all non-audit checks
 - Public health endpoints need no credentials. Private endpoints must validate access tokens, scopes, and ownership on the backend.
 - Resolve internal Student UUIDs from verified `(provider, issuer, subject)` mappings. Never authorize using an arbitrary student ID or email.
 - Never log raw tokens, student content, or conversations. `VITE_` values are public. Do not commit credentials.
-- Follow [Auth0 setup](docs/auth/auth0-setup.md) and [MCP OAuth](docs/auth/mcp-oauth.md). Neither flow is implemented or verified in Milestone 1.
+- Follow [Auth0 setup](docs/auth/auth0-setup.md) and [MCP OAuth](docs/auth/mcp-oauth.md). Authentication is implemented; real acceptance results must be recorded separately. MCP remains a later milestone.
+- Scope tenant Actions to the dedicated Lingora client. The shared legacy linker must exclude Lingora's client and database identities, including candidates reached through other applications; see `infra/auth0/legacy-linker-exclusion.md`.
 - For MCP, use the official SDK and business operations; verify scopes and ownership, validate schemas, and make retry-sensitive writes idempotent.
 - An observation is evidence, not proof of mastery. One mistake must not establish a persistent deficiency.
 
 ## Definition of Done
 
-Document behavior and configuration changes, add meaningful tests for changed behavior, run relevant checks, update migrations/contracts when needed, and report only checks actually executed. Ordinary CI needs no live Auth0 or AI credentials. Real authentication tests are an opt-in later milestone. Never deploy automatically.
+Document behavior and configuration changes, add meaningful tests for changed behavior, run relevant checks, update migrations/contracts when needed, and report only checks actually executed. Ordinary CI needs no live Auth0 or AI credentials. Real authentication tests are opt-in and gate Milestone 2 completion. Never deploy automatically.
 
 Important decisions: [ADRs](docs/adr/README.md). Roadmap: [milestones](docs/product/milestones.md).
