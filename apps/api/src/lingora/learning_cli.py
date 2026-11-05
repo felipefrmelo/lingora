@@ -112,7 +112,15 @@ async def main() -> None:
                 last_ingestion = time.monotonic()
             if args.command == "ingest":
                 return
-            processed = await run_once(database.sessions, provider, settings.lesson_model)
+            try:
+                processed = await run_once(database.sessions, provider, settings.lesson_model)
+            except Exception:
+                # Driver diagnostics may contain private row contents despite hidden SQL params.
+                print(json.dumps({"event": "worker.operation_failed"}), flush=True)
+                if args.once:
+                    raise SystemExit(1) from None
+                await asyncio.sleep(2)
+                continue
             if args.once:
                 return
             if not processed:

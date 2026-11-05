@@ -11,7 +11,7 @@ from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from lingora.modules.onboarding.contracts import CEFR as Cefr
 
-PROMPT_VERSION = "lesson-v1"
+PROMPT_VERSION = "lesson-v2"
 SCHEMA_VERSION = "1"
 Kind = Literal["choice", "gap", "matching", "comprehension", "short_answer"]
 
@@ -33,11 +33,13 @@ class ExerciseView(Contract):
     skill: str = Field(min_length=3, max_length=120)
 
 
-class Exercise(ExerciseView):
+class ExerciseFields(ExerciseView):
     correct_answers: list[str] = Field(min_length=1, max_length=6)
     explanation: str = Field(min_length=10, max_length=1000)
     evidence: str = Field(max_length=500)
 
+
+class Exercise(ExerciseFields):
     @model_validator(mode="after")
     def validate_key(self) -> Self:
         if any(
@@ -77,14 +79,16 @@ class Exercise(ExerciseView):
         return self
 
 
-class LessonDraft(Contract):
+class RawLesson(Contract):
     title: str = Field(min_length=5, max_length=160)
     objectives: list[str] = Field(min_length=2, max_length=4)
     reading: str = Field(min_length=250, max_length=6000)
     vocabulary: list[Vocabulary] = Field(min_length=3, max_length=8)
-    exercises: list[Exercise] = Field(min_length=5, max_length=5)
+    exercises: list[ExerciseFields] = Field(min_length=5, max_length=5)
     discussion: list[str] = Field(min_length=2, max_length=4)
 
+
+class LessonDraft(RawLesson):
     @model_validator(mode="after")
     def educational_checks(self) -> Self:
         if {e.kind for e in self.exercises} != {
@@ -99,6 +103,7 @@ class LessonDraft(Contract):
             if not 5 <= len(value.strip()) <= 500:
                 raise ValueError("Learning instructions must be nonempty and bounded")
         for exercise in self.exercises:
+            Exercise.model_validate(exercise.model_dump())
             if exercise.evidence and exercise.evidence not in self.reading:
                 raise ValueError("Evidence must be a verbatim passage from the reading")
         for word in self.vocabulary:
@@ -233,13 +238,31 @@ def reading_prefix(context: dict[str, Any]) -> str:
     return f"News brief: {source['title']} — {source['summary']}\n\nImagined practice: "
 
 
-def assemble_lesson(document: LessonDraft, context: dict[str, Any]) -> LessonDraft:
-    # Trusted code owns attribution and presentation, rather than asking a model to copy/shuffle.
+def assemble_lesson(document: RawLesson, context: dict[str, Any]) -> LessonDraft:
+    # Trusted code owns attribution and mechanically correct text-question presentation.
     prefix = reading_prefix(context)
     result = document.model_copy(deep=True)
     if not result.reading.startswith(prefix):
         result.reading = prefix + result.reading
     for exercise in result.exercises:
+        if exercise.kind in {"gap", "comprehension", "short_answer"}:
+            answer = exercise.correct_answers[0].strip()
+            if not answer or not exercise.evidence.strip():
+                raise ValueError("Text questions require quoted evidence and an answer")
+            match = re.search(r"(?<!\w)" + re.escape(answer) + r"(?!\w)", exercise.evidence, re.I)
+            if match is None:
+                raise ValueError("A text answer must occur in its quoted evidence")
+            masked = exercise.evidence[: match.start()] + "___" + exercise.evidence[match.end() :]
+            instruction = {
+                "gap": "Complete this exact phrase from the reading",
+                "comprehension": "Find this detail in the reading. Copy the missing word or phrase",
+                "short_answer": "Copy the exact missing word or phrase from this quotation",
+            }[exercise.kind]
+            exercise.prompt = f"{instruction}: “{masked}”"
+            exercise.correct_answers = [match.group()]
+            exercise.explanation = (
+                f"The reading says: “{exercise.evidence}” The missing phrase is “{match.group()}”."
+            )
         if exercise.kind == "matching" and exercise.options == exercise.correct_answers:
             SystemRandom().shuffle(exercise.options)
             if exercise.options == exercise.correct_answers:

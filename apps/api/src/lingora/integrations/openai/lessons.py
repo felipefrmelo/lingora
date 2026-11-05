@@ -4,7 +4,7 @@ from openai import APIConnectionError, APIStatusError, APITimeoutError, AsyncOpe
 from pydantic import ValidationError
 
 from lingora.core.config import Settings
-from lingora.modules.learning.contracts import LessonDraft, assemble_lesson
+from lingora.modules.learning.contracts import RawLesson, assemble_lesson
 from lingora.modules.learning.provider import Generated, GenerationFailure
 
 INSTRUCTIONS = """You are Lingora's English lesson writer. Return a complete lesson JSON.
@@ -31,8 +31,11 @@ one short factual word/phrase, never subjective or open-ended grading. correct_a
 lists distinct accepted alternatives for text questions, each AT MOST EIGHT words.
 Prefer single-word answers and prompts asking for one specific word from the reading.
 Empty options/parts on text types.
-For comprehension, evidence MUST be an exact substring of reading supporting the key.
-For other exercises evidence is an exact substring or empty. Do not put answer keys in
+For gap, comprehension AND short_answer, evidence MUST be a complete verbatim sentence
+from reading, containing the FIRST correct answer as an exact word or phrase. The app
+will turn this evidence into an exact quotation-completion question with accurate
+quoted feedback. For choice/matching, evidence is a verbatim substring or empty.
+Do not put answer keys in
 prompts. All fields are required. No claims about mastered skills or proficiency scores.
 """
 
@@ -60,9 +63,9 @@ class OpenAILessonProvider:
                     text={
                         "format": {
                             "type": "json_schema",
-                            "name": "lesson_v1",
+                            "name": "lesson_v2",
                             "strict": True,
-                            "schema": LessonDraft.model_json_schema(),
+                            "schema": RawLesson.model_json_schema(),
                         }
                     },
                 )
@@ -81,7 +84,7 @@ class OpenAILessonProvider:
                 "incomplete_or_refused", input_tokens=input_tokens, output_tokens=output_tokens
             )
         try:
-            document = LessonDraft.model_validate_json(response.output_text)
+            document = RawLesson.model_validate_json(response.output_text)
             document = assemble_lesson(document, context)
         except ValidationError as error:
             checks = tuple(

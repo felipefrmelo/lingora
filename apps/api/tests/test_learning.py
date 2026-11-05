@@ -319,3 +319,51 @@ async def test_source_availability_uses_only_bounded_head(
             await provider.generate({"source": source.model_dump(mode="json")})
         assert error.value.retryable is (status in {429, 503})
         assert fake.calls == 0
+
+
+async def test_worker_failures_never_print_private_database_diagnostics(
+    monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    import sys
+
+    from sqlalchemy.exc import OperationalError
+
+    from lingora import learning_cli
+
+    async def failure(*args: Any, **kwargs: Any) -> None:
+        raise OperationalError(
+            "private SQL", {"answer": "private student answer"}, Exception("private row contents")
+        )
+
+    monkeypatch.setattr(sys, "argv", ["lingora", "worker", "--once"])
+    monkeypatch.setattr(
+        learning_cli, "Settings", lambda: Settings(openai_api_key=SecretStr("test-only"))
+    )
+    monkeypatch.setattr(learning_cli, "run_once", failure)
+    with pytest.raises(SystemExit) as error:
+        await learning_cli.main()
+    assert error.value.code == 1
+    output = capsys.readouterr()
+    assert "worker.operation_failed" in output.out
+    assert "private" not in output.out + output.err
+
+
+@pytest.mark.parametrize("supported", [True, False])
+def test_text_questions_use_precise_quoted_evidence(supported: bool) -> None:
+    from lingora.modules.learning.contracts import RawLesson, assemble_lesson
+
+    data = lesson_data()
+    data["exercises"][3]["prompt"] = "Name any month you can think of."
+    data["exercises"][3]["correct_answers"] = ["June" if supported else "November", "January"]
+    raw = RawLesson.model_validate(data)
+    context = {"source": {"title": "Garden news", "summary": "A licensed brief."}}
+    if not supported:
+        with pytest.raises(ValueError):
+            assemble_lesson(raw, context)
+    else:
+        result = assemble_lesson(raw, context)
+        question = result.exercises[3]
+        assert "The garden will open in ___." in question.prompt
+        assert question.correct_answers == ["June"]
+        assert "The garden will open in June." in question.explanation
+        assert "Name any month" not in question.prompt
