@@ -1,6 +1,6 @@
 # MCP authorization for Milestone 5
 
-**Status: documented design only. There is no MCP endpoint, registration, account-linking flow, or verified ChatGPT connection in Milestone 1.** Recheck current SDK/provider specifications when implementing it.
+**Status: documented design only. There is no MCP endpoint, registration, account-linking flow, or verified ChatGPT connection in Milestones 1–2.** Recheck current SDK/provider specifications when implementing it.
 
 ## Resource and identity
 
