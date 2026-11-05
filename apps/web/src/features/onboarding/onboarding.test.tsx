@@ -58,7 +58,7 @@ describe('student onboarding', () => {
     expect(await screen.findByRole('heading', { name: 'Welcome, Student One.' })).toBeVisible()
     expect(stored.onboarding_status).toBe('completed')
     expect(stored.selected_cefr).toBeNull()
-    expect(screen.getByText(/first lesson is still taking shape/)).toBeVisible()
+    expect(screen.getByRole('link', { name: 'Find my first lesson' })).toBeVisible()
   })
 
   it('saves suggested and pending custom entries, skips unsaved choices, and resumes saved progress', async () => {

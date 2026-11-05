@@ -1,6 +1,6 @@
 # Student onboarding
 
-Milestone 3 adds skippable setup, an editable learning profile, and self-reported assessment history. See [verification](onboarding-verification.md) for current acceptance status. Lessons, first-activity recommendations, generated content, competencies, and MCP remain later milestones. The PRD RF-02 first-activity acceptance is explicitly deferred to Milestone 4; onboarding ends with a profile overview.
+Milestone 3 adds skippable setup, an editable learning profile, and self-reported assessment history. See [verification](onboarding-verification.md) for current acceptance status. Onboarding ends with a profile overview. Milestone 4 now adds an attributed news catalog and an initial activity suggestion at the chosen lesson level; see [content and lessons](lessons.md). Competency estimates and MCP remain later milestones. The historical Milestone 3 report records RF-02 as deferred at that delivery boundary.
 
 ## Learner flow
 

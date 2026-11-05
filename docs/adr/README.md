@@ -13,3 +13,5 @@ Accepted decisions describe the foundation and intended integration boundaries, 
 9. [AI integration boundary](0009-ai-boundary.md)
 
 10. [Optional onboarding and original assessments](0010-onboarding-and-assessments.md)
+
+11. [Licensed briefs, lessons, and durable workers](0011-content-lessons-and-worker.md)

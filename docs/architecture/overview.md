@@ -2,7 +2,7 @@
 
 ## Delivery boundary
 
-This is a modular monolith with a React SPA and one Python deployment. Milestone 3 adds optional onboarding and self-reported assessment history to the Auth0-authenticated foundation. The PRD defines the full product; the initialization guidelines split it into seven technical milestones. Learning workflows, AI generation, and MCP remain outside this delivery.
+This is a modular monolith with a React SPA and one Python deployment. Milestone 4 adds licensed brief ingestion, private generated reading lessons, deterministic exercises, and saved attempts to authenticated onboarding. The PRD defines the full product; the initialization guidelines split it into seven technical milestones. MCP, adaptive plans, and mastery estimates remain later deliveries.
 
 ## Runtime and dependency flow
 
@@ -44,4 +44,4 @@ Liveness has no dependencies. Readiness performs a bounded PostgreSQL probe, not
 
 Root Make commands orchestrate uv, pnpm, and Docker. PostgreSQL has separate development and test services; tests refuse non-test database names. CI uses service-container PostgreSQL and deterministic tests, with no tenant or AI credentials. Docker Compose currently runs database services only; production application containers and hosting are deferred until deployment requirements are known.
 
-Important jobs will use a durable worker/queue once required. FastAPI BackgroundTasks must not be used for generation, reviews, or writes that must survive restart. The AI boundary will use structured outputs, versioned prompts, deterministic fakes, and evaluation data when lesson generation is implemented.
+The lesson worker now uses PostgreSQL jobs with leases, fencing tokens, bounded retries, and atomic publication. It calls the provider outside database transactions and refreshes selected feeds every six hours. See [content and lessons](../lessons.md). FastAPI BackgroundTasks must not be used for generation, reviews, or writes that must survive restart. The OpenAI provider boundary uses structured outputs, versioned prompts/schema, deterministic fakes, and rejection/grading fixtures. Operational provider metadata excludes student content. Automated checks gate publication structure; real output still needs factual and pedagogical review.

@@ -29,6 +29,12 @@ dev-api:
 dev-web:
 	$(PNPM) --filter @lingora/web dev
 
+ingest-content:
+	$(UV) run --project apps/api python -m lingora.learning_cli ingest
+
+dev-worker:
+	$(UV) run --project apps/api python -m lingora.learning_cli worker
+
 api-generate:
 	$(UV) run --project apps/api python apps/api/scripts/export_openapi.py
 	$(PNPM) --filter @lingora/api-client generate

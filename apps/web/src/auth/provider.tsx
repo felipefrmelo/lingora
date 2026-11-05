@@ -48,7 +48,10 @@ function SdkBridge({ children }: { children: ReactNode }) {
   const previousSubject = useRef(subject)
 
   useEffect(() => {
-    if (previousSubject.current && previousSubject.current !== subject) cancelPrivateRequests(previousSubject.current)
+    if (previousSubject.current && previousSubject.current !== subject) {
+      cancelPrivateRequests(previousSubject.current)
+      queryClient.getMutationCache().clear()
+    }
     previousSubject.current = subject
     queryClient.removeQueries({
       predicate: (query) => query.queryKey[0] === 'private' && query.queryKey[1] !== subject,
@@ -73,6 +76,7 @@ function SdkBridge({ children }: { children: ReactNode }) {
   const logout = useCallback(async () => {
     cancelPrivateRequests()
     queryClient.removeQueries({ queryKey: ['private'] })
+    queryClient.getMutationCache().clear()
     setOperationError(null)
     try {
       await sdk.logout({ logoutParams: { returnTo: window.location.origin } })

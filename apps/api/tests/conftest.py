@@ -17,6 +17,9 @@ from tests.auth_support import AUDIENCE, DOMAIN, ISSUER, JwksEndpoint, TokenFact
 def isolated_environment(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
     monkeypatch.chdir(tmp_path)
     for name in (
+        "OPENAI_API_KEY",
+        "LESSON_MODEL",
+        "LESSON_TIMEOUT_SECONDS",
         "DATABASE_URL",
         "CORS_ORIGINS",
         "DB_READY_TIMEOUT_SECONDS",

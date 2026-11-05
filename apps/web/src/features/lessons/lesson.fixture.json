@@ -1,0 +1,94 @@
+{
+  "title": "A small garden for the community",
+  "objectives": [
+    "Find a key fact in a short report.",
+    "Use words about community projects."
+  ],
+  "reading": "A local community is planning a garden. The garden will open in June. Volunteers will plant trees and flowers. The project gives neighbours a place to meet. Imagine that you are a volunteer. You could help to plant a tree or bring some water. This example shows how people can work together. A small action can help a shared space grow.",
+  "vocabulary": [
+    {
+      "term": "garden",
+      "meaning": "A place for growing plants."
+    },
+    {
+      "term": "volunteer",
+      "meaning": "A person who helps without payment."
+    },
+    {
+      "term": "project",
+      "meaning": "A planned piece of work."
+    }
+  ],
+  "exercises": [
+    {
+      "kind": "choice",
+      "prompt": "What are people planning?",
+      "options": [
+        "A garden",
+        "A library",
+        "A station"
+      ],
+      "parts": [],
+      "skill": "Reading: identify the main idea"
+    },
+    {
+      "kind": "gap",
+      "prompt": "Volunteers will ___ trees.",
+      "options": [],
+      "parts": [],
+      "skill": "Vocabulary: use a verb"
+    },
+    {
+      "kind": "matching",
+      "prompt": "Match the words with their meanings.",
+      "options": [
+        "A planned piece of work",
+        "A person who helps"
+      ],
+      "parts": [
+        "volunteer",
+        "project"
+      ],
+      "skill": "Vocabulary: connect word meanings"
+    },
+    {
+      "kind": "comprehension",
+      "prompt": "In which month will the garden open?",
+      "options": [],
+      "parts": [],
+      "skill": "Reading: locate a time"
+    },
+    {
+      "kind": "short_answer",
+      "prompt": "Complete the phrase: a place to ___.",
+      "options": [],
+      "parts": [],
+      "skill": "Reading: find a verb"
+    }
+  ],
+  "discussion": [
+    "Would you like a garden near your home? Why?",
+    "How could you help a community project?"
+  ],
+  "id": "lesson-one",
+  "created_at": "2026-11-05T12:00:00Z",
+  "cefr": "B1",
+  "level_reason": "Uses your self-selected profile level.",
+  "source": {
+    "id": "content-one",
+    "title": "A garden",
+    "summary": "A local community garden opens in June.",
+    "url": "https://www.gov.uk/government/news/garden",
+    "source": "GOV.UK",
+    "published_at": "2026-11-05T00:00:00Z",
+    "license_name": "OGL-3.0",
+    "license_url": "https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/",
+    "attribution": "Contains public sector information licensed under OGL v3.0.",
+    "topics": [
+      "environment"
+    ]
+  },
+  "prompt_version": "lesson-v1",
+  "schema_version": "1",
+  "attempt_count": 0
+}

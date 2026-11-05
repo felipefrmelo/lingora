@@ -301,10 +301,93 @@
         "title": "AssessmentWrite",
         "type": "object"
       },
+      "AttemptView": {
+        "additionalProperties": false,
+        "properties": {
+          "answers": {
+            "items": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "title": "Answers",
+            "type": "array"
+          },
+          "correct": {
+            "title": "Correct",
+            "type": "integer"
+          },
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "lesson_id": {
+            "format": "uuid",
+            "title": "Lesson Id",
+            "type": "string"
+          },
+          "results": {
+            "items": {
+              "$ref": "#/components/schemas/ExerciseFeedback"
+            },
+            "title": "Results",
+            "type": "array"
+          },
+          "total": {
+            "title": "Total",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "lesson_id",
+          "created_at",
+          "answers",
+          "results",
+          "correct",
+          "total"
+        ],
+        "title": "AttemptView",
+        "type": "object"
+      },
       "BootstrapRequest": {
         "additionalProperties": false,
         "properties": {},
         "title": "BootstrapRequest",
+        "type": "object"
+      },
+      "Catalog": {
+        "additionalProperties": false,
+        "properties": {
+          "generation_available": {
+            "title": "Generation Available",
+            "type": "boolean"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/ContentView"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "total": {
+            "title": "Total",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "items",
+          "total",
+          "generation_available"
+        ],
+        "title": "Catalog",
         "type": "object"
       },
       "ComponentScore": {
@@ -361,6 +444,212 @@
         "title": "ComponentScore",
         "type": "object"
       },
+      "ContentView": {
+        "additionalProperties": false,
+        "properties": {
+          "attribution": {
+            "title": "Attribution",
+            "type": "string"
+          },
+          "difficulty": {
+            "const": "unrated",
+            "default": "unrated",
+            "title": "Difficulty",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "language": {
+            "const": "en",
+            "default": "en",
+            "title": "Language",
+            "type": "string"
+          },
+          "license_name": {
+            "title": "License Name",
+            "type": "string"
+          },
+          "license_url": {
+            "title": "License Url",
+            "type": "string"
+          },
+          "published_at": {
+            "format": "date-time",
+            "title": "Published At",
+            "type": "string"
+          },
+          "recommendation_reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Recommendation Reason"
+          },
+          "source": {
+            "title": "Source",
+            "type": "string"
+          },
+          "summary": {
+            "title": "Summary",
+            "type": "string"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          },
+          "topics": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Topics",
+            "type": "array"
+          },
+          "url": {
+            "title": "Url",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "title",
+          "url",
+          "published_at",
+          "source",
+          "license_name",
+          "license_url",
+          "attribution",
+          "summary",
+          "topics"
+        ],
+        "title": "ContentView",
+        "type": "object"
+      },
+      "ExerciseFeedback": {
+        "additionalProperties": false,
+        "properties": {
+          "correct": {
+            "title": "Correct",
+            "type": "boolean"
+          },
+          "expected": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Expected",
+            "type": "array"
+          },
+          "explanation": {
+            "title": "Explanation",
+            "type": "string"
+          },
+          "skill": {
+            "title": "Skill",
+            "type": "string"
+          }
+        },
+        "required": [
+          "correct",
+          "expected",
+          "explanation",
+          "skill"
+        ],
+        "title": "ExerciseFeedback",
+        "type": "object"
+      },
+      "ExerciseView": {
+        "additionalProperties": false,
+        "properties": {
+          "kind": {
+            "enum": [
+              "choice",
+              "gap",
+              "matching",
+              "comprehension",
+              "short_answer"
+            ],
+            "title": "Kind",
+            "type": "string"
+          },
+          "options": {
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 6,
+            "title": "Options",
+            "type": "array"
+          },
+          "parts": {
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 6,
+            "title": "Parts",
+            "type": "array"
+          },
+          "prompt": {
+            "maxLength": 800,
+            "minLength": 5,
+            "title": "Prompt",
+            "type": "string"
+          },
+          "skill": {
+            "maxLength": 120,
+            "minLength": 3,
+            "title": "Skill",
+            "type": "string"
+          }
+        },
+        "required": [
+          "kind",
+          "prompt",
+          "options",
+          "parts",
+          "skill"
+        ],
+        "title": "ExerciseView",
+        "type": "object"
+      },
+      "GenerateLesson": {
+        "additionalProperties": false,
+        "properties": {
+          "cefr": {
+            "anyOf": [
+              {
+                "enum": [
+                  "A1",
+                  "A2",
+                  "B1",
+                  "B2",
+                  "C1",
+                  "C2"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cefr"
+          },
+          "content_id": {
+            "format": "uuid",
+            "title": "Content Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "content_id"
+        ],
+        "title": "GenerateLesson",
+        "type": "object"
+      },
       "HealthResponse": {
         "properties": {
           "status": {
@@ -373,6 +662,209 @@
           "status"
         ],
         "title": "HealthResponse",
+        "type": "object"
+      },
+      "JobView": {
+        "additionalProperties": false,
+        "properties": {
+          "cefr": {
+            "enum": [
+              "A1",
+              "A2",
+              "B1",
+              "B2",
+              "C1",
+              "C2"
+            ],
+            "title": "Cefr",
+            "type": "string"
+          },
+          "content_id": {
+            "format": "uuid",
+            "title": "Content Id",
+            "type": "string"
+          },
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "error_code": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Error Code"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "lesson_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Lesson Id"
+          },
+          "level_reason": {
+            "title": "Level Reason",
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "queued",
+              "running",
+              "succeeded",
+              "failed"
+            ],
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "content_id",
+          "status",
+          "cefr",
+          "level_reason",
+          "lesson_id",
+          "error_code",
+          "created_at"
+        ],
+        "title": "JobView",
+        "type": "object"
+      },
+      "LessonList": {
+        "additionalProperties": false,
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/JobView"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "total": {
+            "title": "Total",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "items",
+          "total"
+        ],
+        "title": "LessonList",
+        "type": "object"
+      },
+      "LessonView": {
+        "additionalProperties": false,
+        "properties": {
+          "attempt_count": {
+            "title": "Attempt Count",
+            "type": "integer"
+          },
+          "cefr": {
+            "enum": [
+              "A1",
+              "A2",
+              "B1",
+              "B2",
+              "C1",
+              "C2"
+            ],
+            "title": "Cefr",
+            "type": "string"
+          },
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "discussion": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Discussion",
+            "type": "array"
+          },
+          "exercises": {
+            "items": {
+              "$ref": "#/components/schemas/ExerciseView"
+            },
+            "title": "Exercises",
+            "type": "array"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "level_reason": {
+            "title": "Level Reason",
+            "type": "string"
+          },
+          "objectives": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Objectives",
+            "type": "array"
+          },
+          "prompt_version": {
+            "title": "Prompt Version",
+            "type": "string"
+          },
+          "reading": {
+            "title": "Reading",
+            "type": "string"
+          },
+          "schema_version": {
+            "title": "Schema Version",
+            "type": "string"
+          },
+          "source": {
+            "$ref": "#/components/schemas/ContentView"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          },
+          "vocabulary": {
+            "items": {
+              "$ref": "#/components/schemas/Vocabulary"
+            },
+            "title": "Vocabulary",
+            "type": "array"
+          }
+        },
+        "required": [
+          "id",
+          "created_at",
+          "cefr",
+          "level_reason",
+          "source",
+          "title",
+          "objectives",
+          "reading",
+          "vocabulary",
+          "exercises",
+          "discussion",
+          "prompt_version",
+          "schema_version",
+          "attempt_count"
+        ],
+        "title": "LessonView",
         "type": "object"
       },
       "ProblemDetails": {
@@ -756,6 +1248,28 @@
         "title": "StudentAccountResponse",
         "type": "object"
       },
+      "SubmitAttempt": {
+        "additionalProperties": false,
+        "properties": {
+          "answers": {
+            "items": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "maxItems": 5,
+            "minItems": 5,
+            "title": "Answers",
+            "type": "array"
+          }
+        },
+        "required": [
+          "answers"
+        ],
+        "title": "SubmitAttempt",
+        "type": "object"
+      },
       "ValidationIssue": {
         "properties": {
           "location": {
@@ -782,6 +1296,29 @@
           "message"
         ],
         "title": "ValidationIssue",
+        "type": "object"
+      },
+      "Vocabulary": {
+        "additionalProperties": false,
+        "properties": {
+          "meaning": {
+            "maxLength": 300,
+            "minLength": 1,
+            "title": "Meaning",
+            "type": "string"
+          },
+          "term": {
+            "maxLength": 80,
+            "minLength": 1,
+            "title": "Term",
+            "type": "string"
+          }
+        },
+        "required": [
+          "term",
+          "meaning"
+        ],
+        "title": "Vocabulary",
         "type": "object"
       }
     },
@@ -1150,6 +1687,438 @@
         "summary": "Bootstrap Student",
         "tags": [
           "identity"
+        ]
+      }
+    },
+    "/api/v1/me/content": {
+      "get": {
+        "operationId": "listLearningContent",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "topic",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "pattern": "^(space|environment|science)$",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Topic"
+            }
+          },
+          {
+            "in": "query",
+            "name": "offset",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "minimum": 0,
+              "title": "Offset",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "maximum": 50,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Catalog"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "default": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Request error"
+          }
+        },
+        "security": [
+          {
+            "Auth0AccessToken": []
+          }
+        ],
+        "summary": "Content",
+        "tags": [
+          "learning"
+        ]
+      }
+    },
+    "/api/v1/me/lesson-jobs/{job_id}": {
+      "get": {
+        "operationId": "getLessonJob",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "job_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Job Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/JobView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "default": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Request error"
+          }
+        },
+        "security": [
+          {
+            "Auth0AccessToken": []
+          }
+        ],
+        "summary": "Job",
+        "tags": [
+          "learning"
+        ]
+      }
+    },
+    "/api/v1/me/lessons": {
+      "get": {
+        "operationId": "listLessons",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "offset",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "minimum": 0,
+              "title": "Offset",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "maximum": 50,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LessonList"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "default": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Request error"
+          }
+        },
+        "security": [
+          {
+            "Auth0AccessToken": []
+          }
+        ],
+        "summary": "Lessons",
+        "tags": [
+          "learning"
+        ]
+      },
+      "post": {
+        "operationId": "prepareLesson",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Idempotency-Key",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Idempotency-Key",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GenerateLesson"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "202": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/JobView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "default": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Request error"
+          }
+        },
+        "security": [
+          {
+            "Auth0AccessToken": []
+          }
+        ],
+        "summary": "Prepare",
+        "tags": [
+          "learning"
+        ]
+      }
+    },
+    "/api/v1/me/lessons/{lesson_id}": {
+      "get": {
+        "operationId": "getLesson",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "lesson_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Lesson Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LessonView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "default": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Request error"
+          }
+        },
+        "security": [
+          {
+            "Auth0AccessToken": []
+          }
+        ],
+        "summary": "Lesson",
+        "tags": [
+          "learning"
+        ]
+      }
+    },
+    "/api/v1/me/lessons/{lesson_id}/attempts": {
+      "get": {
+        "operationId": "listExerciseAttempts",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "lesson_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Lesson Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "offset",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "minimum": 0,
+              "title": "Offset",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "maximum": 50,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/AttemptView"
+                  },
+                  "title": "Response Listexerciseattempts",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "default": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Request error"
+          }
+        },
+        "security": [
+          {
+            "Auth0AccessToken": []
+          }
+        ],
+        "summary": "Attempts",
+        "tags": [
+          "learning"
+        ]
+      },
+      "post": {
+        "operationId": "submitExerciseAttempt",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "lesson_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Lesson Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "Idempotency-Key",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Idempotency-Key",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SubmitAttempt"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AttemptView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "default": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Request error"
+          }
+        },
+        "security": [
+          {
+            "Auth0AccessToken": []
+          }
+        ],
+        "summary": "Attempt",
+        "tags": [
+          "learning"
         ]
       }
     },

@@ -22,6 +22,9 @@ class Settings(BaseSettings):
     auth0_email_verified_claim: str = "https://lingora.local/api/email_verified"
     auth0_jwks_cache_seconds: int = Field(default=300, ge=1, le=3600)
     auth0_jwks_timeout_seconds: float = Field(default=5, gt=0, le=10)
+    openai_api_key: SecretStr = SecretStr("")
+    lesson_model: str = "gpt-5-mini-2025-08-07"
+    lesson_timeout_seconds: float = Field(default=120, ge=10, le=180)
 
     @property
     def auth0_configured(self) -> bool:
