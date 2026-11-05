@@ -3,6 +3,7 @@ from typing import Annotated
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, Header, HTTPException, Query, Request, Response
+from sqlalchemy.exc import SQLAlchemyError
 
 from lingora.modules.identity.http import ReadPrincipal, Session, WritePrincipal
 from lingora.modules.onboarding import application
@@ -31,6 +32,11 @@ async def resource_errors() -> AsyncIterator[None]:
     except CreationGone:
         raise HTTPException(
             410, "This assessment was deleted. Start a new entry to create another."
+        ) from None
+    except SQLAlchemyError:
+        # Do not expose/log SQL parameters or PostgreSQL row-detail diagnostics.
+        raise HTTPException(
+            503, "Learning records are temporarily unavailable. Try again shortly."
         ) from None
 
 

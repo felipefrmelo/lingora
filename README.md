@@ -2,7 +2,7 @@
 
 English practice inspired by your world. Lingora will organize personalized lessons, exercises, learning evidence, and progress; ChatGPT will provide conversational practice through MCP.
 
-**Current delivery: Milestone 3 — Student Onboarding.** Auth0 authentication and the foundation are retained. Learners can save optional learning preferences, skip/resume setup, edit a profile, and record self-reported external assessment results without automatic score conversion or CEFR changes. See the [onboarding guide](docs/onboarding.md) and [verification report](docs/onboarding-verification.md) for actual acceptance status. Lessons, first-activity recommendations, AI generation, and MCP are later milestones.
+**Current delivery: Milestone 3 — Student Onboarding.** Auth0 authentication and the foundation are retained. Learners can save optional learning preferences, skip/resume setup, edit a profile, and record self-reported external assessment results without automatic score conversion or CEFR changes. The real development acceptance journey passed; see the [onboarding guide](docs/onboarding.md) and [verification report](docs/onboarding-verification.md) for evidence. Lessons, first-activity recommendations, AI generation, and MCP are later milestones.
 
 ## Prerequisites
 

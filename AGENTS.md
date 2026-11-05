@@ -44,6 +44,6 @@ make check                   # all non-audit checks
 
 ## Definition of Done
 
-Document behavior and configuration changes, add meaningful tests for changed behavior, run relevant checks, update migrations/contracts when needed, and report only checks actually executed. Ordinary CI needs no live Auth0 or AI credentials. Real authentication tests are opt-in and gate Milestone 2 completion. Never deploy automatically.
+Document behavior and configuration changes, add meaningful tests for changed behavior, run relevant checks, update migrations/contracts when needed, and report only checks actually executed. Ordinary CI needs no live Auth0 or AI credentials. Real authentication/onboarding tests are opt-in and gate their milestones; record actual results separately. Never deploy automatically.
 
 Important decisions: [ADRs](docs/adr/README.md). Roadmap: [milestones](docs/product/milestones.md).

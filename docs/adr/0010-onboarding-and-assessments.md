@@ -1,6 +1,6 @@
 # 0010 — Optional onboarding and original assessment evidence
 
-Status: Accepted; implemented in Milestone 3, with live acceptance tracked separately. Date: 2026-11-05.
+Status: Accepted; implemented in Milestone 3, with real development acceptance verified. Date: 2026-11-05.
 
 Decision: Keep the existing authenticated Student mapping authoritative. Add a one-to-one learning profile and student-owned self-reported assessments. All profile fields are optional, setup can be skipped, and explicit server-confirmed intent controls onboarding state. Editing a skipped profile preserves that state; resuming guided setup is explicit. Completion is preserved during later edits.
 

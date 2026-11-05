@@ -1,9 +1,15 @@
 from datetime import UTC, datetime, timedelta
+from typing import Any
 
 import pytest
+from fastapi import FastAPI
+from httpx import ASGITransport, AsyncClient
 from pydantic import ValidationError
+from sqlalchemy.exc import OperationalError
 
+from lingora.modules.onboarding import application
 from lingora.modules.onboarding.contracts import AssessmentFields, ProfileResponse, ProfileWrite
+from tests.auth_support import TokenFactory
 
 
 def test_empty_profile_and_explicit_unknown_level() -> None:
@@ -81,3 +87,25 @@ def test_assessment_validation(extra: dict[str, object]) -> None:
         AssessmentFields.model_validate(
             {"provider": "other", "test_name": "Test", "taken_on": "2026-01-01", **extra}
         )
+
+
+async def test_database_outage_returns_sanitized_retryable_problem(
+    authenticated_app: FastAPI, token_factory: TokenFactory, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    async def unavailable(*args: Any, **kwargs: Any) -> None:
+        raise OperationalError(
+            "private SQL",
+            {"preferred_name": "private-student-content"},
+            Exception("database offline"),
+        )
+
+    monkeypatch.setattr(application, "read_profile", unavailable)
+    async with AsyncClient(
+        transport=ASGITransport(app=authenticated_app), base_url="http://test"
+    ) as client:
+        response = await client.get(
+            "/api/v1/me/profile", headers={"Authorization": "Bearer " + token_factory()}
+        )
+    assert response.status_code == 503
+    assert response.headers["content-type"].startswith("application/problem+json")
+    assert "private" not in response.text
