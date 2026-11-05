@@ -21,3 +21,14 @@ const others = matches.filter(
 ```
 
 The candidate exclusion matters: skipping only the Lingora client would still let another tenant application automatically link a new Lingora database identity later. Existing users outside Lingora retain the same selection and linking logic. Do not unlink or modify already-linked Auth0 accounts.
+
+## MCP extension (prepared; not yet deployed)
+
+For the dedicated MCP API, pass the exact MCP resource URL and comma-separated approved Auth0 client IDs into the helper as `LINGORA_MCP_RESOURCE_URL` and `LINGORA_MCP_CLIENT_IDS`. The new helper skips linking only when **both** the resource and the client match. Preserve the existing SPA/database/candidate exclusions and unrelated linking behavior. Apply the same two values to the verification Action, which uses the same pair check and keeps the existing verified-email claim. Update the existing handler invocation to:
+
+```js
+if (skipLegacyLinking(event, event.secrets.LINGORA_CLIENT_ID,
+  event.secrets.LINGORA_MCP_RESOURCE_URL, event.secrets.LINGORA_MCP_CLIENT_IDS)) return
+```
+
+Inspect and back up the currently deployed Action before applying this change. Do not grant a client access until both Actions are deployed and tested. Adding a ChatGPT client ID without checking the target resource would affect other applications in this shared tenant.

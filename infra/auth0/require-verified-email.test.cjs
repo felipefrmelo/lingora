@@ -31,3 +31,27 @@ test('an unconfigured Action grants no verified claim', async () => {
   await onExecutePostLogin(f.event, f.api)
   assert.deepEqual(f.calls, [])
 })
+
+test('only an approved MCP client targeting the Lingora resource is verified', async () => {
+  const resource = 'https://mcp.example/mcp'
+  const f = fixture('mcp-client', true)
+  Object.assign(f.event.secrets, { LINGORA_MCP_CLIENT_IDS: 'mcp-client', LINGORA_MCP_RESOURCE_URL: resource })
+  f.event.resource_server = { identifier: resource }
+  await onExecutePostLogin(f.event, f.api)
+  assert.deepEqual(f.calls, [['claim', 'https://lingora.local/api/email_verified', true]])
+  f.calls.length = 0
+  f.event.resource_server.identifier = 'https://unrelated.example/mcp'
+  await onExecutePostLogin(f.event, f.api)
+  assert.deepEqual(f.calls, [])
+  f.event.resource_server.identifier = resource
+  f.event.client.client_id = 'other-client'
+  await onExecutePostLogin(f.event, f.api)
+  assert.deepEqual(f.calls, [])
+})
+test('unverified MCP logins are denied', async () => {
+  const f = fixture('mcp-client', false)
+  Object.assign(f.event.secrets, { LINGORA_MCP_CLIENT_IDS: 'mcp-client', LINGORA_MCP_RESOURCE_URL: 'https://mcp.example/mcp' })
+  f.event.resource_server = { identifier: 'https://mcp.example/mcp' }
+  await onExecutePostLogin(f.event, f.api)
+  assert.deepEqual(f.calls, [['deny', 'lingora_email_verification_required']])
+})
