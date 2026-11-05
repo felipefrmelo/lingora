@@ -1,6 +1,12 @@
 {
   "components": {
     "schemas": {
+      "BootstrapRequest": {
+        "additionalProperties": false,
+        "properties": {},
+        "title": "BootstrapRequest",
+        "type": "object"
+      },
       "HealthResponse": {
         "properties": {
           "status": {
@@ -77,6 +83,26 @@
         "title": "ReadyResponse",
         "type": "object"
       },
+      "StudentAccountResponse": {
+        "properties": {
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "created_at"
+        ],
+        "title": "StudentAccountResponse",
+        "type": "object"
+      },
       "ValidationIssue": {
         "properties": {
           "location": {
@@ -104,6 +130,12 @@
         ],
         "title": "ValidationIssue",
         "type": "object"
+      }
+    },
+    "securitySchemes": {
+      "Auth0AccessToken": {
+        "scheme": "bearer",
+        "type": "http"
       }
     }
   },
@@ -142,6 +174,95 @@
         "summary": "Health",
         "tags": [
           "system"
+        ]
+      }
+    },
+    "/api/v1/me": {
+      "get": {
+        "operationId": "getCurrentStudent",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StudentAccountResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "default": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Request error"
+          }
+        },
+        "security": [
+          {
+            "Auth0AccessToken": []
+          }
+        ],
+        "summary": "Current Student",
+        "tags": [
+          "identity"
+        ]
+      }
+    },
+    "/api/v1/me/bootstrap": {
+      "post": {
+        "operationId": "bootstrapCurrentStudent",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "anyOf": [
+                  {
+                    "$ref": "#/components/schemas/BootstrapRequest"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Payload"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StudentAccountResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "default": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Request error"
+          }
+        },
+        "security": [
+          {
+            "Auth0AccessToken": []
+          }
+        ],
+        "summary": "Bootstrap Student",
+        "tags": [
+          "identity"
         ]
       }
     },

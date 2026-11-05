@@ -43,6 +43,7 @@ test-integration: db-test-up
 
 test-web:
 	$(PNPM) test
+	node --test infra/auth0/*.test.cjs
 
 test-e2e:
 	$(PNPM) test:e2e

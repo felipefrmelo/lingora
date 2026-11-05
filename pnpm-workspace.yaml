@@ -1,3 +1,6 @@
 packages:
   - apps/web
   - packages/*
+allowBuilds:
+  # This dependency's postinstall only prints a funding notice; no build is needed.
+  browser-tabs-lock: false
