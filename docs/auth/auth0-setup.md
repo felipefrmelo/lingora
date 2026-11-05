@@ -69,10 +69,12 @@ The API validates signature, RS256, trusted key ID, exact issuer/audience, expir
 
 Responses contain only internal UUID and creation timestamp. Provider profile information stays in the SDK. The immutable principal is independent of FastAPI. Application transactions resolve `(provider=auth0, issuer, subject)`, never email. Concurrent provisioning rolls back the losing transaction before resolving the winning identity, leaving no orphan student.
 
-Problem details distinguish invalid credentials (401), insufficient authorization (403), unprovisioned account (404), and unavailable auth configuration/key retrieval (503). Health checks remain public without Auth0 configuration. Private query data is removed on logout and SDK subject changes. Tokens attach only to protected API requests. A 401 allows one silent cache-bypassing token retry; failures requiring interaction show a sign-in control without redirect loops. Browser privacy restrictions may require interactive sign-in after a reload. Logout clears the browser session but does not revoke previously issued JWTs; expiry bounds their remaining validity.
+Problem details distinguish invalid credentials (401), insufficient authorization (403), unprovisioned account (404), and unavailable auth configuration/key retrieval (503). Health checks remain public without Auth0 configuration. Account, profile, and assessment queries share a private subject-scoped namespace and are removed on logout/SDK subject changes; pending private requests are aborted and keyed forms unmount. Tokens attach only to protected API requests. A 401 allows one silent cache-bypassing token retry; failures requiring interaction show a sign-in control without redirect loops. Browser privacy restrictions may require interactive sign-in after a reload. Logout clears the browser session but does not revoke previously issued JWTs; expiry bounds their remaining validity.
 
 ## Reference documentation
 
 - [Auth0 React SDK](https://auth0.github.io/auth0-react/)
 - [Access token validation](https://auth0.com/docs/secure/tokens/access-tokens/validate-access-tokens)
 - [Google connection](https://auth0.com/docs/authenticate/identity-providers/social-identity-providers/google)
+
+Milestone 3 reuses the existing profile scopes and adds no tenant changes. See [onboarding](../onboarding.md) for new self-resource endpoints, optimistic versions, and creation keys.

@@ -33,9 +33,19 @@
 }
 
 body { margin: 0; min-width: 320px; }
+main { overflow-wrap: anywhere; }
 button, a { -webkit-tap-highlight-color: transparent; }
 a:focus-visible { outline: 2px solid var(--primary); outline-offset: 4px; }
 ::selection { background: #d5e4cc; }
+
+.field-label { display: block; font-size: 0.875rem; font-weight: 600; }
+.field-input { display: block; width: 100%; min-height: 2.75rem; padding: 0.65rem 0.85rem; border: 1px solid var(--border); border-radius: 0.75rem; background: var(--card); color: var(--foreground); font: inherit; font-size: 0.95rem; }
+.field-input:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+.field-input:disabled { opacity: 0.6; }
+.field-error { color: var(--destructive); font-size: 0.875rem; }
+.form-section { padding: clamp(1.25rem, 4vw, 2rem); border: 1px solid var(--border); border-radius: 1.5rem; background: var(--card); }
+input[type="radio"] { accent-color: var(--primary); }
+button:focus-visible { outline: 2px solid var(--primary); outline-offset: 3px; }
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }

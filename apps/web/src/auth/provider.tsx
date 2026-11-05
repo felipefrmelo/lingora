@@ -1,8 +1,9 @@
 import { Auth0Provider, useAuth0 } from '@auth0/auth0-react'
 import { useQueryClient } from '@tanstack/react-query'
-import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import type { AuthConfig } from './config'
 import { AuthContext, SignInRequired, classifyAuthError, type AuthErrorCode, type AuthState } from './context'
+import { cancelPrivateRequests } from './private-api'
 
 const unavailable: AuthState = {
   configured: false,
@@ -44,10 +45,13 @@ function SdkBridge({ children }: { children: ReactNode }) {
   const queryClient = useQueryClient()
   const [operationError, setOperationError] = useState<AuthErrorCode | null>(null)
   const subject = sdk.user?.sub
+  const previousSubject = useRef(subject)
 
   useEffect(() => {
+    if (previousSubject.current && previousSubject.current !== subject) cancelPrivateRequests(previousSubject.current)
+    previousSubject.current = subject
     queryClient.removeQueries({
-      predicate: (query) => query.queryKey[0] === 'account' && query.queryKey[1] !== subject,
+      predicate: (query) => query.queryKey[0] === 'private' && query.queryKey[1] !== subject,
     })
   }, [queryClient, subject])
 
@@ -67,7 +71,8 @@ function SdkBridge({ children }: { children: ReactNode }) {
   }, [sdk])
 
   const logout = useCallback(async () => {
-    queryClient.removeQueries({ queryKey: ['account'] })
+    cancelPrivateRequests()
+    queryClient.removeQueries({ queryKey: ['private'] })
     setOperationError(null)
     try {
       await sdk.logout({ logoutParams: { returnTo: window.location.origin } })

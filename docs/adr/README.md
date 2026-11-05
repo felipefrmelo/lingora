@@ -11,3 +11,5 @@ Accepted decisions describe the foundation and intended integration boundaries, 
 7. [PostgreSQL persistence](0007-postgresql.md)
 8. [Background processing](0008-background-processing.md)
 9. [AI integration boundary](0009-ai-boundary.md)
+
+10. [Optional onboarding and original assessments](0010-onboarding-and-assessments.md)

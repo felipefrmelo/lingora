@@ -1,16 +1,28 @@
 import { useQuery } from '@tanstack/react-query'
+import { Fragment, lazy, Suspense, type ReactNode } from 'react'
 import { useAuth, SignInRequired } from '../../auth/context'
 import { AuthMessage } from '../../auth/auth-status'
 import { Button } from '../../components/ui/button'
 import { AccountApiError, createAccountApi } from './api'
+import { privateKey } from '../../auth/private-api'
+const ProfileOverview = lazy(() => import('../onboarding/overview').then(module => ({ default: module.ProfileOverview })))
+const ProfilePage = lazy(() => import('../onboarding/profile-page').then(module => ({ default: module.ProfilePage })))
 
 export function AccountPage() {
+  return <AccountBoundary><ProfileOverview /></AccountBoundary>
+}
+
+export function LearningProfilePage({ wizard = false }: { wizard?: boolean }) {
+  return <AccountBoundary><ProfilePage wizard={wizard} /></AccountBoundary>
+}
+
+export function AccountBoundary({ children }: { children: ReactNode }) {
   const auth = useAuth()
   const account = useQuery({
-    queryKey: ['account', auth.subject],
+    queryKey: privateKey(auth.subject, 'account'),
     enabled: auth.isAuthenticated && Boolean(auth.subject) && !auth.error,
     queryFn: async ({ signal }) => {
-      const api = createAccountApi(auth.getAccessToken)
+      const api = createAccountApi(auth.getAccessToken, auth.subject)
       await api.bootstrap(signal)
       return api.current(signal)
     },
@@ -27,7 +39,7 @@ export function AccountPage() {
   }
 
   return (
-    <main id="main" className="mx-auto max-w-3xl px-6 py-16 sm:px-10">
+    <main id="main" className="mx-auto max-w-4xl px-6 py-12 sm:px-10 sm:py-16">
       {account.isPending ? <p role="status">Preparing your account…</p> : account.isError ? (
         <section role="alert" className="rounded-3xl border border-border bg-card p-8">
           <h1 className="font-display text-3xl">We couldn’t open your account</h1>
@@ -37,14 +49,7 @@ export function AccountPage() {
           <Button className="mt-6" variant="outline" onClick={() => void account.refetch()}>Try again</Button>
         </section>
       ) : (
-        <section className="rounded-3xl border border-border bg-card p-8 sm:p-12" aria-labelledby="account-title">
-          <p className="text-xs font-semibold uppercase tracking-widest text-primary">Your Lingora account</p>
-          <h1 id="account-title" className="mt-5 font-display text-4xl">Welcome{auth.name ? `, ${auth.name}` : ''}.</h1>
-          <p className="mt-5 text-muted-foreground">Your personal learning space starts here.</p>
-          {auth.email && <p className="mt-7 break-all text-sm">Signed in as {auth.email}</p>}
-          <p className="mt-3 text-sm text-muted-foreground">Account created {new Intl.DateTimeFormat('en', { dateStyle: 'medium' }).format(new Date(account.data.created_at))}</p>
-          <Button className="mt-8" variant="outline" onClick={() => void auth.logout()}>Sign out of Lingora</Button>
-        </section>
+        <Fragment key={auth.subject}><Suspense fallback={<p role="status">Loading your learning space…</p>}>{children}</Suspense></Fragment>
       )}
     </main>
   )

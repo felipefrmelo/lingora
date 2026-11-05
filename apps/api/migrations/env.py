@@ -3,6 +3,7 @@ from sqlalchemy import create_engine, pool
 
 from lingora.core.config import Settings
 from lingora.modules.identity.models import Student
+from lingora.modules.onboarding import models as models  # noqa: F401
 
 config = context.config
 target_metadata = Student.metadata
