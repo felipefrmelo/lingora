@@ -2,9 +2,10 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import type { ReactNode } from 'react'
+import { StrictMode, type ReactNode } from 'react'
 import { AuthProvider } from './provider'
 import { useAuth } from './context'
+import { protectedRequest } from './private-api'
 
 const sdk = vi.hoisted(() => ({
   isLoading: false,
@@ -46,6 +47,29 @@ beforeEach(() => {
 })
 
 describe('Auth0 SDK bridge', () => {
+  it('keeps current-identity requests alive during Strict Mode effect replay', async () => {
+    let resolve!: (token: string) => void
+    const token = new Promise<string>(done => { resolve = done })
+    const execute = vi.fn().mockResolvedValue({ response: new Response(), data: 'private result' })
+    const pending = protectedRequest(() => token, 'auth0|one')(execute)
+    render(<StrictMode>{app(new QueryClient())}</StrictMode>)
+    resolve('access-token')
+    await expect(pending).resolves.toBe('private result')
+    expect(execute).toHaveBeenCalledOnce()
+  })
+
+  it('aborts an old identity’s pending request when the SDK account changes', async () => {
+    let resolve!: (token: string) => void
+    const token = new Promise<string>(done => { resolve = done })
+    const execute = vi.fn()
+    const view = render(app(new QueryClient()))
+    const pending = protectedRequest(() => token, 'auth0|one')(execute)
+    sdk.user = { sub: 'google-oauth2|two', name: 'Two', email: 'two@example.test' }
+    view.rerender(app(new QueryClient()))
+    resolve('old-access-token')
+    await expect(pending).rejects.toMatchObject({ name: 'AbortError' })
+    expect(execute).not.toHaveBeenCalled()
+  })
   it('uses the SDK registration flow', async () => {
     const client = new QueryClient()
     render(app(client))
@@ -55,9 +79,12 @@ describe('Auth0 SDK bridge', () => {
 
   it('clears account data before calling Auth0 logout', async () => {
     const client = new QueryClient()
-    client.setQueryData(['account', 'auth0|one'], { id: 'one' })
+    client.setQueryData(['private', 'auth0|one', 'account'], { id: 'one' })
+    client.setQueryData(['private', 'auth0|one', 'profile'], { preferred_name: 'Private name' })
+    client.setQueryData(['private', 'auth0|one', 'assessments', 0], { items: ['private result'] })
     sdk.logout.mockImplementation(async () => {
-      expect(client.getQueryData(['account', 'auth0|one'])).toBeUndefined()
+      expect(client.getQueryData(['private', 'auth0|one', 'account'])).toBeUndefined()
+      expect(client.getQueryCache().findAll({ queryKey: ['private'] })).toHaveLength(0)
     })
     render(app(client))
     await userEvent.click(screen.getByRole('button', { name: 'Logout' }))
@@ -66,13 +93,13 @@ describe('Auth0 SDK bridge', () => {
 
   it('removes the previous identity cache when accounts change', async () => {
     const client = new QueryClient()
-    client.setQueryData(['account', 'auth0|one'], { id: 'one' })
+    client.setQueryData(['private', 'auth0|one', 'account'], { id: 'one' })
     const view = render(app(client))
     sdk.user = { sub: 'google-oauth2|two', name: 'Two', email: 'two@example.test' }
-    client.setQueryData(['account', 'google-oauth2|two'], { id: 'two' })
+    client.setQueryData(['private', 'google-oauth2|two', 'account'], { id: 'two' })
     view.rerender(app(client))
-    await waitFor(() => expect(client.getQueryData(['account', 'auth0|one'])).toBeUndefined())
-    expect(client.getQueryData(['account', 'google-oauth2|two'])).toEqual({ id: 'two' })
+    await waitFor(() => expect(client.getQueryData(['private', 'auth0|one', 'account'])).toBeUndefined())
+    expect(client.getQueryData(['private', 'google-oauth2|two', 'account'])).toEqual({ id: 'two' })
     expect(screen.queryByText('one@example.test')).not.toBeInTheDocument()
     expect(screen.getByText('two@example.test')).toBeVisible()
   })

@@ -2,7 +2,7 @@
 
 ## Delivery boundary
 
-This is a modular monolith with a React SPA and one Python deployment. Milestone 2 adds Auth0 authentication and self-account provisioning to the operational foundation. The PRD defines the full product; the initialization guidelines split it into seven technical milestones. Onboarding, learning workflows, and MCP remain outside this delivery.
+This is a modular monolith with a React SPA and one Python deployment. Milestone 3 adds optional onboarding and self-reported assessment history to the Auth0-authenticated foundation. The PRD defines the full product; the initialization guidelines split it into seven technical milestones. Learning workflows, AI generation, and MCP remain outside this delivery.
 
 ## Runtime and dependency flow
 
@@ -24,13 +24,13 @@ Create modules incrementally for identity, onboarding, placement, competencies, 
 
 SQLAlchemy 2 uses psycopg 3 async I/O in request workflows. Application use cases own `session.begin()` boundaries. Dependencies supply sessions but never commit automatically. Alembic uses synchronous connections in its separate CLI process; it does not block the request event loop. Migrations are explicit release/development operations and never run at application startup.
 
-`students` contains internal UUIDs and timestamps. `external_identities` maps `(provider, issuer, subject)` uniquely to a student, indexes the foreign key, and cascades mappings on student deletion. Email is not an identity key. One student may have multiple intentionally linked mappings; account linking needs a verified future workflow. `updated_at` updates through SQLAlchemy ORM writes; raw SQL callers must maintain it explicitly. Provider names and email remain in the Auth0 SDK profile; the database stores no profile, token, or transcript. Concurrent first logins roll back a losing student insert before resolving the winning identity.
+`students` contains internal UUIDs and timestamps. `external_identities` maps `(provider, issuer, subject)` uniquely to a student, indexes the foreign key, and cascades mappings on student deletion. Email is not an identity key. One student may have multiple intentionally linked mappings; account linking needs a verified future workflow. `updated_at` updates through SQLAlchemy ORM writes; raw SQL callers must maintain it explicitly. Provider names and email remain in the Auth0 SDK profile; onboarding stores a separate optional Lingora preferred name and learning preferences, never tokens or transcripts. Concurrent first logins roll back a losing student insert before resolving the winning identity.
 
-Add student ownership foreign keys, resource-level authorization, version fields, idempotency keys, and audit events with the first business operations that require them. Do not build the entire PRD schema in advance. Database row-level security is a future defense-in-depth decision, not a replacement for backend checks.
+Onboarding resources have student ownership foreign keys, version-checked mutations, and explicit transactions. Assessments use durable per-student creation receipts; retries cannot duplicate or resurrect deleted evidence. See [onboarding](../onboarding.md). Add audit events with pedagogical operations that require historical evidence. Do not build the entire PRD schema in advance. Database row-level security is a future defense-in-depth decision, not a replacement for backend checks.
 
 ## Frontend and contracts
 
-Typed TanStack routes organize navigation; Query owns server state. Components live with their features. The foundation has no forms yet, but React Hook Form, Zod, and resolvers are available for onboarding. Tailwind tokens and a minimal shadcn-style Button establish accessible component conventions. No global state store or SSR is needed.
+Typed TanStack routes organize navigation; Query owns server state. Components live with their features. React Hook Form and Zod implement optional setup and assessment forms. Private pages are lazy-loaded; Query keys include the authenticated subject, and logout/account changes purge private queries, cancel requests, and unmount previous forms. Tailwind tokens and a minimal shadcn-style Button establish accessible component conventions. No global state store or SSR is needed.
 
 FastAPI/Pydantic define wire contracts. Export OpenAPI without executing lifespan connections, then generate types with `openapi-typescript`. `openapi-fetch` provides a typed client. CI regenerates both artifacts and rejects drift. Do not manually mirror backend request/response types.
 

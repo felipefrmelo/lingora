@@ -15,6 +15,7 @@ from lingora.health import router
 from lingora.infrastructure.database import Database
 from lingora.integrations.auth0.verifier import Auth0TokenVerifier
 from lingora.modules.identity.http import router as identity_router
+from lingora.modules.onboarding.http import router as onboarding_router
 
 
 def create_app(settings: Settings | None = None) -> FastAPI:
@@ -45,6 +46,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.state.token_verifier = Auth0TokenVerifier(settings)
     app.include_router(router)
     app.include_router(identity_router)
+    app.include_router(onboarding_router)
     register_error_handlers(app)
     register_request_middleware(app, tracer_provider)
     # Outermost application middleware: error responses receive the same CORS headers.
@@ -52,8 +54,8 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         CORSMiddleware,
         allow_origins=settings.cors_origins,
         allow_credentials=False,
-        allow_methods=["GET", "POST"],
-        allow_headers=["Authorization", "Content-Type"],
+        allow_methods=["GET", "POST", "PUT", "DELETE"],
+        allow_headers=["Authorization", "Content-Type", "Idempotency-Key"],
         expose_headers=["X-Request-ID"],
     )
     return app

@@ -1,10 +1,364 @@
 {
   "components": {
     "schemas": {
+      "AssessmentFields": {
+        "additionalProperties": false,
+        "properties": {
+          "component_scores": {
+            "items": {
+              "$ref": "#/components/schemas/ComponentScore"
+            },
+            "maxItems": 20,
+            "title": "Component Scores",
+            "type": "array"
+          },
+          "overall_score": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Score"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "provider": {
+            "enum": [
+              "englishscore",
+              "ef_set",
+              "other"
+            ],
+            "title": "Provider",
+            "type": "string"
+          },
+          "reported_cefr": {
+            "anyOf": [
+              {
+                "enum": [
+                  "A1",
+                  "A2",
+                  "B1",
+                  "B2",
+                  "C1",
+                  "C2"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reported Cefr"
+          },
+          "taken_on": {
+            "format": "date",
+            "title": "Taken On",
+            "type": "string"
+          },
+          "test_name": {
+            "maxLength": 120,
+            "minLength": 1,
+            "title": "Test Name",
+            "type": "string"
+          },
+          "variant": {
+            "anyOf": [
+              {
+                "maxLength": 120,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Variant"
+          }
+        },
+        "required": [
+          "provider",
+          "test_name",
+          "taken_on"
+        ],
+        "title": "AssessmentFields",
+        "type": "object"
+      },
+      "AssessmentList": {
+        "additionalProperties": false,
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/AssessmentResponse"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "total": {
+            "title": "Total",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "items",
+          "total"
+        ],
+        "title": "AssessmentList",
+        "type": "object"
+      },
+      "AssessmentResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "component_scores": {
+            "items": {
+              "$ref": "#/components/schemas/ComponentScore"
+            },
+            "maxItems": 20,
+            "title": "Component Scores",
+            "type": "array"
+          },
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "overall_score": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Score"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "provider": {
+            "enum": [
+              "englishscore",
+              "ef_set",
+              "other"
+            ],
+            "title": "Provider",
+            "type": "string"
+          },
+          "reported_cefr": {
+            "anyOf": [
+              {
+                "enum": [
+                  "A1",
+                  "A2",
+                  "B1",
+                  "B2",
+                  "C1",
+                  "C2"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reported Cefr"
+          },
+          "self_reported": {
+            "const": true,
+            "default": true,
+            "title": "Self Reported",
+            "type": "boolean"
+          },
+          "taken_on": {
+            "format": "date",
+            "title": "Taken On",
+            "type": "string"
+          },
+          "test_name": {
+            "maxLength": 120,
+            "minLength": 1,
+            "title": "Test Name",
+            "type": "string"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "title": "Updated At",
+            "type": "string"
+          },
+          "variant": {
+            "anyOf": [
+              {
+                "maxLength": 120,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Variant"
+          },
+          "version": {
+            "title": "Version",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "provider",
+          "test_name",
+          "taken_on",
+          "id",
+          "version",
+          "created_at",
+          "updated_at"
+        ],
+        "title": "AssessmentResponse",
+        "type": "object"
+      },
+      "AssessmentWrite": {
+        "additionalProperties": false,
+        "properties": {
+          "component_scores": {
+            "items": {
+              "$ref": "#/components/schemas/ComponentScore"
+            },
+            "maxItems": 20,
+            "title": "Component Scores",
+            "type": "array"
+          },
+          "expected_version": {
+            "minimum": 1.0,
+            "title": "Expected Version",
+            "type": "integer"
+          },
+          "overall_score": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Score"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "provider": {
+            "enum": [
+              "englishscore",
+              "ef_set",
+              "other"
+            ],
+            "title": "Provider",
+            "type": "string"
+          },
+          "reported_cefr": {
+            "anyOf": [
+              {
+                "enum": [
+                  "A1",
+                  "A2",
+                  "B1",
+                  "B2",
+                  "C1",
+                  "C2"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reported Cefr"
+          },
+          "taken_on": {
+            "format": "date",
+            "title": "Taken On",
+            "type": "string"
+          },
+          "test_name": {
+            "maxLength": 120,
+            "minLength": 1,
+            "title": "Test Name",
+            "type": "string"
+          },
+          "variant": {
+            "anyOf": [
+              {
+                "maxLength": 120,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Variant"
+          }
+        },
+        "required": [
+          "provider",
+          "test_name",
+          "taken_on",
+          "expected_version"
+        ],
+        "title": "AssessmentWrite",
+        "type": "object"
+      },
       "BootstrapRequest": {
         "additionalProperties": false,
         "properties": {},
         "title": "BootstrapRequest",
+        "type": "object"
+      },
+      "ComponentScore": {
+        "additionalProperties": false,
+        "properties": {
+          "reported_cefr": {
+            "anyOf": [
+              {
+                "enum": [
+                  "A1",
+                  "A2",
+                  "B1",
+                  "B2",
+                  "C1",
+                  "C2"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reported Cefr"
+          },
+          "scale": {
+            "anyOf": [
+              {
+                "maxLength": 100,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Scale"
+          },
+          "skill": {
+            "maxLength": 100,
+            "minLength": 1,
+            "title": "Skill",
+            "type": "string"
+          },
+          "value": {
+            "maxLength": 64,
+            "minLength": 1,
+            "title": "Value",
+            "type": "string"
+          }
+        },
+        "required": [
+          "value",
+          "skill"
+        ],
+        "title": "ComponentScore",
         "type": "object"
       },
       "HealthResponse": {
@@ -69,6 +423,277 @@
         "title": "ProblemDetails",
         "type": "object"
       },
+      "ProfileResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "completed_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Completed At"
+          },
+          "correction_mode": {
+            "default": "balanced",
+            "enum": [
+              "free",
+              "balanced",
+              "intensive"
+            ],
+            "title": "Correction Mode",
+            "type": "string"
+          },
+          "goals": {
+            "items": {
+              "maxLength": 100,
+              "minLength": 1,
+              "type": "string"
+            },
+            "maxItems": 10,
+            "title": "Goals",
+            "type": "array"
+          },
+          "interests": {
+            "items": {
+              "maxLength": 100,
+              "minLength": 1,
+              "type": "string"
+            },
+            "maxItems": 10,
+            "title": "Interests",
+            "type": "array"
+          },
+          "native_language": {
+            "anyOf": [
+              {
+                "maxLength": 80,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Native Language"
+          },
+          "onboarding_status": {
+            "default": "not_started",
+            "enum": [
+              "not_started",
+              "in_progress",
+              "skipped",
+              "completed"
+            ],
+            "title": "Onboarding Status",
+            "type": "string"
+          },
+          "preferred_name": {
+            "anyOf": [
+              {
+                "maxLength": 80,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Preferred Name"
+          },
+          "selected_cefr": {
+            "anyOf": [
+              {
+                "enum": [
+                  "A1",
+                  "A2",
+                  "B1",
+                  "B2",
+                  "C1",
+                  "C2"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Selected Cefr"
+          },
+          "session_duration_minutes": {
+            "anyOf": [
+              {
+                "maximum": 120.0,
+                "minimum": 5.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Session Duration Minutes"
+          },
+          "sessions_per_week": {
+            "anyOf": [
+              {
+                "maximum": 7.0,
+                "minimum": 1.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sessions Per Week"
+          },
+          "updated_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Updated At"
+          },
+          "version": {
+            "default": 0,
+            "title": "Version",
+            "type": "integer"
+          }
+        },
+        "title": "ProfileResponse",
+        "type": "object"
+      },
+      "ProfileWrite": {
+        "additionalProperties": false,
+        "properties": {
+          "correction_mode": {
+            "default": "balanced",
+            "enum": [
+              "free",
+              "balanced",
+              "intensive"
+            ],
+            "title": "Correction Mode",
+            "type": "string"
+          },
+          "expected_version": {
+            "minimum": 0.0,
+            "title": "Expected Version",
+            "type": "integer"
+          },
+          "goals": {
+            "items": {
+              "maxLength": 100,
+              "minLength": 1,
+              "type": "string"
+            },
+            "maxItems": 10,
+            "title": "Goals",
+            "type": "array"
+          },
+          "intent": {
+            "default": "save",
+            "enum": [
+              "save",
+              "resume",
+              "skip",
+              "finish"
+            ],
+            "title": "Intent",
+            "type": "string"
+          },
+          "interests": {
+            "items": {
+              "maxLength": 100,
+              "minLength": 1,
+              "type": "string"
+            },
+            "maxItems": 10,
+            "title": "Interests",
+            "type": "array"
+          },
+          "native_language": {
+            "anyOf": [
+              {
+                "maxLength": 80,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Native Language"
+          },
+          "preferred_name": {
+            "anyOf": [
+              {
+                "maxLength": 80,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Preferred Name"
+          },
+          "selected_cefr": {
+            "anyOf": [
+              {
+                "enum": [
+                  "A1",
+                  "A2",
+                  "B1",
+                  "B2",
+                  "C1",
+                  "C2"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Selected Cefr"
+          },
+          "session_duration_minutes": {
+            "anyOf": [
+              {
+                "maximum": 120.0,
+                "minimum": 5.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Session Duration Minutes"
+          },
+          "sessions_per_week": {
+            "anyOf": [
+              {
+                "maximum": 7.0,
+                "minimum": 1.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sessions Per Week"
+          }
+        },
+        "required": [
+          "expected_version"
+        ],
+        "title": "ProfileWrite",
+        "type": "object"
+      },
       "ReadyResponse": {
         "properties": {
           "status": {
@@ -81,6 +706,34 @@
           "status"
         ],
         "title": "ReadyResponse",
+        "type": "object"
+      },
+      "Score": {
+        "additionalProperties": false,
+        "properties": {
+          "scale": {
+            "anyOf": [
+              {
+                "maxLength": 100,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Scale"
+          },
+          "value": {
+            "maxLength": 64,
+            "minLength": 1,
+            "title": "Value",
+            "type": "string"
+          }
+        },
+        "required": [
+          "value"
+        ],
+        "title": "Score",
         "type": "object"
       },
       "StudentAccountResponse": {
@@ -213,6 +866,240 @@
         ]
       }
     },
+    "/api/v1/me/assessments": {
+      "get": {
+        "operationId": "listAssessments",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "maximum": 100,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "offset",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "minimum": 0,
+              "title": "Offset",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AssessmentList"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "default": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Request error"
+          }
+        },
+        "security": [
+          {
+            "Auth0AccessToken": []
+          }
+        ],
+        "summary": "Get Assessments",
+        "tags": [
+          "onboarding"
+        ]
+      },
+      "post": {
+        "operationId": "createAssessment",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Idempotency-Key",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Idempotency-Key",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AssessmentFields"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AssessmentResponse"
+                }
+              }
+            },
+            "description": "Replayed creation"
+          },
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AssessmentResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "default": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Request error"
+          }
+        },
+        "security": [
+          {
+            "Auth0AccessToken": []
+          }
+        ],
+        "summary": "Post Assessment",
+        "tags": [
+          "onboarding"
+        ]
+      }
+    },
+    "/api/v1/me/assessments/{assessment_id}": {
+      "delete": {
+        "operationId": "deleteAssessment",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "assessment_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Assessment Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "expected_version",
+            "required": true,
+            "schema": {
+              "minimum": 1,
+              "title": "Expected Version",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "default": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Request error"
+          }
+        },
+        "security": [
+          {
+            "Auth0AccessToken": []
+          }
+        ],
+        "summary": "Remove Assessment",
+        "tags": [
+          "onboarding"
+        ]
+      },
+      "put": {
+        "operationId": "updateAssessment",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "assessment_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Assessment Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AssessmentWrite"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AssessmentResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "default": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Request error"
+          }
+        },
+        "security": [
+          {
+            "Auth0AccessToken": []
+          }
+        ],
+        "summary": "Put Assessment",
+        "tags": [
+          "onboarding"
+        ]
+      }
+    },
     "/api/v1/me/bootstrap": {
       "post": {
         "operationId": "bootstrapCurrentStudent",
@@ -263,6 +1150,86 @@
         "summary": "Bootstrap Student",
         "tags": [
           "identity"
+        ]
+      }
+    },
+    "/api/v1/me/profile": {
+      "get": {
+        "operationId": "getLearningProfile",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProfileResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "default": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Request error"
+          }
+        },
+        "security": [
+          {
+            "Auth0AccessToken": []
+          }
+        ],
+        "summary": "Get Profile",
+        "tags": [
+          "onboarding"
+        ]
+      },
+      "put": {
+        "operationId": "saveLearningProfile",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProfileWrite"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProfileResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "default": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Request error"
+          }
+        },
+        "security": [
+          {
+            "Auth0AccessToken": []
+          }
+        ],
+        "summary": "Put Profile",
+        "tags": [
+          "onboarding"
         ]
       }
     },

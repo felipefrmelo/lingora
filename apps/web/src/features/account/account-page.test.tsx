@@ -4,7 +4,7 @@ import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { AuthContext, SignInRequired, type AuthState } from '../../auth/context'
-import { AccountPage } from './account-page'
+import { AccountBoundary } from './account-page'
 import { AccountApiError } from './api'
 
 const api = vi.hoisted(() => ({ bootstrap: vi.fn(), current: vi.fn() }))
@@ -21,7 +21,7 @@ function renderAccount(overrides: Partial<AuthState> = {}) {
     login, logout, getAccessToken: vi.fn().mockResolvedValue('access-token'), ...overrides,
   }
   const client = new QueryClient({ defaultOptions: { queries: { retry: false, gcTime: 0 } } })
-  const route = createRootRoute({ component: AccountPage })
+  const route = createRootRoute({ component: () => <AccountBoundary><h1>Account ready</h1></AccountBoundary> })
   const router = createRouter({ routeTree: route, history: createMemoryHistory({ initialEntries: ['/'] }) })
   render(<QueryClientProvider client={client}><AuthContext.Provider value={auth}><RouterProvider router={router} /></AuthContext.Provider></QueryClientProvider>)
 }
@@ -46,7 +46,7 @@ describe('private account page', () => {
       return account
     })
     renderAccount()
-    expect(await screen.findByRole('heading', { name: 'Welcome, Student One.' })).toBeVisible()
+    expect(await screen.findByRole('heading', { name: 'Account ready' })).toBeVisible()
     expect(api.current).toHaveBeenCalledTimes(1)
   })
 
@@ -64,7 +64,7 @@ describe('private account page', () => {
     const retry = await screen.findByRole('button', { name: 'Try again' })
     expect(screen.getByText('Your sign-in is still active. Please try again shortly.')).toBeVisible()
     await userEvent.click(retry)
-    expect(await screen.findByRole('heading', { name: 'Welcome, Student One.' })).toBeVisible()
+    expect(await screen.findByRole('heading', { name: 'Account ready' })).toBeVisible()
     expect(logout).not.toHaveBeenCalled()
   })
 

@@ -27,12 +27,16 @@ test('anonymous visitors cannot open a student account', async ({ page, request 
   page.on('request', (call) => {
     if (call.url().includes('/api/v1/me')) accountRequests.push(call.url())
   })
-  await page.goto('/app')
-  await expect(page.getByRole('heading', { name: 'Sign-in is temporarily unavailable' })).toBeVisible()
-  await expect(page.getByText('Account created', { exact: false })).toHaveCount(0)
+  for (const path of ['/app', '/app/onboarding', '/app/profile']) {
+    await page.goto(path)
+    await expect(page.getByRole('heading', { name: 'Sign-in is temporarily unavailable' })).toBeVisible()
+    await expect(page.getByText('Account created', { exact: false })).toHaveCount(0)
+  }
   expect(accountRequests).toEqual([])
   const response = await request.get('/api/v1/me')
   expect(response.status()).toBe(401)
+  expect((await request.get('/api/v1/me/profile')).status()).toBe(401)
+  expect((await request.get('/api/v1/me/assessments')).status()).toBe(401)
   await page.getByRole('link', { name: 'Return home' }).click()
   await expect(page.getByRole('heading', { level: 1 })).toContainText('Your world.')
 })

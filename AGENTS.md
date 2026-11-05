@@ -39,6 +39,7 @@ make check                   # all non-audit checks
 - Follow [Auth0 setup](docs/auth/auth0-setup.md) and [MCP OAuth](docs/auth/mcp-oauth.md). Authentication is implemented; real acceptance results must be recorded separately. MCP remains a later milestone.
 - Scope tenant Actions to the dedicated Lingora client. The shared legacy linker must exclude Lingora's client and database identities, including candidates reached through other applications; see `infra/auth0/legacy-linker-exclusion.md`.
 - For MCP, use the official SDK and business operations; verify scopes and ownership, validate schemas, and make retry-sensitive writes idempotent.
+- Onboarding and assessments resolve the authenticated student; never accept client-supplied ownership. Preserve raw scores, keep selected CEFR explicit, and use optimistic versions/durable creation keys. Clear all private queries and pending requests on logout/identity changes. See [onboarding](docs/onboarding.md).
 - An observation is evidence, not proof of mastery. One mistake must not establish a persistent deficiency.
 
 ## Definition of Done
