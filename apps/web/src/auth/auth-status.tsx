@@ -8,7 +8,7 @@ export function AuthMessage({ code }: { code?: AuthErrorCode | null }) {
   return (
     <section className="mx-auto max-w-lg rounded-3xl border border-border bg-card p-8" aria-labelledby="auth-title">
       <h1 id="auth-title" className="font-display text-3xl">{
-        verification ? 'Check your email' : !auth.configured ? 'Sign-in is temporarily unavailable' : code ? 'We couldn’t complete sign-in' : 'Your learning space is private'
+        verification ? 'Check your email' : code === 'interaction_required' ? 'Sign in again to continue' : !auth.configured ? 'Sign-in is temporarily unavailable' : code ? 'We couldn’t complete sign-in' : 'Your learning space is private'
       }</h1>
       <p className="mt-4 leading-relaxed text-muted-foreground">{
         verification

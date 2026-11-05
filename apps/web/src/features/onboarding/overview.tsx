@@ -30,7 +30,7 @@ export function ProfileOverview() {
         <div><dt className="field-label">Conversation corrections</dt><dd className="mt-2 capitalize text-muted-foreground">{data.correction_mode || 'balanced'}</dd></div>
       </dl>
     </section>
-    <aside className="rounded-3xl border border-border bg-muted p-7"><p className="text-xs font-semibold uppercase tracking-widest text-primary">Up next</p><h2 className="mt-3 font-display text-2xl">Your first lesson is still taking shape.</h2><p className="mt-3 leading-relaxed text-muted-foreground">Your preferences are saved. Personalized lessons and first-activity suggestions arrive in a future update.</p></aside>
+    <aside className="rounded-3xl border border-border bg-muted p-7"><p className="text-xs font-semibold uppercase tracking-widest text-primary">Up next</p><h2 className="mt-3 font-display text-2xl">Your next discovery starts here.</h2><p className="mt-3 leading-relaxed text-muted-foreground">Explore news briefs, find a topic that interests you, and practise English at your selected level.</p><Button asChild className="mt-5"><Link to="/app/learn">Find my first lesson</Link></Button></aside>
     <AssessmentManager />
   </div>
 }

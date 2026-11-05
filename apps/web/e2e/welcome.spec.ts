@@ -27,7 +27,7 @@ test('anonymous visitors cannot open a student account', async ({ page, request 
   page.on('request', (call) => {
     if (call.url().includes('/api/v1/me')) accountRequests.push(call.url())
   })
-  for (const path of ['/app', '/app/onboarding', '/app/profile']) {
+  for (const path of ['/app', '/app/onboarding', '/app/profile', '/app/learn', '/app/learn/jobs/00000000-0000-0000-0000-000000000001', '/app/lessons/00000000-0000-0000-0000-000000000001']) {
     await page.goto(path)
     await expect(page.getByRole('heading', { name: 'Sign-in is temporarily unavailable' })).toBeVisible()
     await expect(page.getByText('Account created', { exact: false })).toHaveCount(0)
@@ -37,6 +37,9 @@ test('anonymous visitors cannot open a student account', async ({ page, request 
   expect(response.status()).toBe(401)
   expect((await request.get('/api/v1/me/profile')).status()).toBe(401)
   expect((await request.get('/api/v1/me/assessments')).status()).toBe(401)
+  expect((await request.get('/api/v1/me/content')).status()).toBe(401)
+  expect((await request.get('/api/v1/me/lessons')).status()).toBe(401)
+  expect((await request.post('/api/v1/me/lessons', { data: {} })).status()).toBe(401)
   await page.getByRole('link', { name: 'Return home' }).click()
   await expect(page.getByRole('heading', { level: 1 })).toContainText('Your world.')
 })

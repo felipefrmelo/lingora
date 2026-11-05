@@ -82,9 +82,11 @@ describe('Auth0 SDK bridge', () => {
     client.setQueryData(['private', 'auth0|one', 'account'], { id: 'one' })
     client.setQueryData(['private', 'auth0|one', 'profile'], { preferred_name: 'Private name' })
     client.setQueryData(['private', 'auth0|one', 'assessments', 0], { items: ['private result'] })
+    await client.getMutationCache().build(client, { mutationFn: async (answers: string) => answers }).execute('Private exercise answers')
     sdk.logout.mockImplementation(async () => {
       expect(client.getQueryData(['private', 'auth0|one', 'account'])).toBeUndefined()
       expect(client.getQueryCache().findAll({ queryKey: ['private'] })).toHaveLength(0)
+      expect(client.getMutationCache().getAll()).toHaveLength(0)
     })
     render(app(client))
     await userEvent.click(screen.getByRole('button', { name: 'Logout' }))
@@ -93,6 +95,7 @@ describe('Auth0 SDK bridge', () => {
 
   it('removes the previous identity cache when accounts change', async () => {
     const client = new QueryClient()
+    await client.getMutationCache().build(client, { mutationFn: async (answers: string) => answers }).execute('First account answers')
     client.setQueryData(['private', 'auth0|one', 'account'], { id: 'one' })
     const view = render(app(client))
     sdk.user = { sub: 'google-oauth2|two', name: 'Two', email: 'two@example.test' }
@@ -100,6 +103,7 @@ describe('Auth0 SDK bridge', () => {
     view.rerender(app(client))
     await waitFor(() => expect(client.getQueryData(['private', 'auth0|one', 'account'])).toBeUndefined())
     expect(client.getQueryData(['private', 'google-oauth2|two', 'account'])).toEqual({ id: 'two' })
+    expect(client.getMutationCache().getAll()).toHaveLength(0)
     expect(screen.queryByText('one@example.test')).not.toBeInTheDocument()
     expect(screen.getByText('two@example.test')).toBeVisible()
   })

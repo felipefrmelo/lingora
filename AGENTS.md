@@ -40,6 +40,7 @@ make check                   # all non-audit checks
 - Scope tenant Actions to the dedicated Lingora client. The shared legacy linker must exclude Lingora's client and database identities, including candidates reached through other applications; see `infra/auth0/legacy-linker-exclusion.md`.
 - For MCP, use the official SDK and business operations; verify scopes and ownership, validate schemas, and make retry-sensitive writes idempotent.
 - Onboarding and assessments resolve the authenticated student; never accept client-supplied ownership. Preserve raw scores, keep selected CEFR explicit, and use optimistic versions/durable creation keys. Clear all private queries and pending requests on logout/identity changes. See [onboarding](docs/onboarding.md).
+- Learning generation uses durable PostgreSQL jobs, bounded provider calls, and atomic fenced publication. Never expose answer keys before a persisted attempt or fetch learner-supplied URLs. Preserve license/source attribution and keep provider telemetry free of student content. See [lessons](docs/lessons.md).
 - An observation is evidence, not proof of mastery. One mistake must not establish a persistent deficiency.
 
 ## Definition of Done

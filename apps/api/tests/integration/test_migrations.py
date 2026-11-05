@@ -21,6 +21,17 @@ def test_upgrade_downgrade_and_no_model_drift(migration_config: Config) -> None:
             ),
             {"id": identity_id, "student_id": student_id},
         )
+    command.upgrade(migration_config, "0002")
+    with engine.begin() as connection:
+        connection.execute(
+            text(
+                "INSERT INTO student_profiles "
+                "(student_id, goals, interests, correction_mode, "
+                "onboarding_status, version, selected_cefr) "
+                "VALUES (:id, '[]', '[]', 'balanced', 'skipped', 1, 'B1')"
+            ),
+            {"id": student_id},
+        )
     command.upgrade(migration_config, "head")
     tables = inspect(engine).get_table_names()
     assert "students" in tables
@@ -35,6 +46,25 @@ def test_upgrade_downgrade_and_no_model_drift(migration_config: Config) -> None:
             )
             == student_id
         )
-        assert connection.scalar(text("SELECT count(*) FROM student_profiles")) == 0
+        assert connection.scalar(text("SELECT count(*) FROM student_profiles")) == 1
+        assert (
+            connection.scalar(
+                text("SELECT onboarding_status FROM student_profiles WHERE student_id = :id"),
+                {"id": student_id},
+            )
+            == "skipped"
+        )
+    assert {
+        "contents",
+        "lessons",
+        "lesson_jobs",
+        "exercise_attempts",
+        "generation_events",
+    }.issubset(tables)
+    command.downgrade(migration_config, "0002")
+    assert "lessons" not in inspect(engine).get_table_names()
+    with engine.connect() as connection:
+        assert connection.scalar(text("SELECT count(*) FROM student_profiles")) == 1
+    command.upgrade(migration_config, "head")
     command.check(migration_config)
     engine.dispose()

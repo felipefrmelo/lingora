@@ -91,6 +91,93 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/me/content": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Content */
+        get: operations["listLearningContent"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/me/lesson-jobs/{job_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Job */
+        get: operations["getLessonJob"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/me/lessons": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Lessons */
+        get: operations["listLessons"];
+        put?: never;
+        /** Prepare */
+        post: operations["prepareLesson"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/me/lessons/{lesson_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Lesson */
+        get: operations["getLesson"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/me/lessons/{lesson_id}/attempts": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Attempts */
+        get: operations["listExerciseAttempts"];
+        put?: never;
+        /** Attempt */
+        post: operations["submitExerciseAttempt"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/me/profile": {
         parameters: {
             query?: never;
@@ -228,8 +315,43 @@ export interface components {
             /** Variant */
             variant?: string | null;
         };
+        /** AttemptView */
+        AttemptView: {
+            /** Answers */
+            answers: string[][];
+            /** Correct */
+            correct: number;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /**
+             * Lesson Id
+             * Format: uuid
+             */
+            lesson_id: string;
+            /** Results */
+            results: components["schemas"]["ExerciseFeedback"][];
+            /** Total */
+            total: number;
+        };
         /** BootstrapRequest */
         BootstrapRequest: Record<string, never>;
+        /** Catalog */
+        Catalog: {
+            /** Generation Available */
+            generation_available: boolean;
+            /** Items */
+            items: components["schemas"]["ContentView"][];
+            /** Total */
+            total: number;
+        };
         /** ComponentScore */
         ComponentScore: {
             /** Reported Cefr */
@@ -241,6 +363,86 @@ export interface components {
             /** Value */
             value: string;
         };
+        /** ContentView */
+        ContentView: {
+            /** Attribution */
+            attribution: string;
+            /**
+             * Difficulty
+             * @default unrated
+             * @constant
+             */
+            difficulty: "unrated";
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /**
+             * Language
+             * @default en
+             * @constant
+             */
+            language: "en";
+            /** License Name */
+            license_name: string;
+            /** License Url */
+            license_url: string;
+            /**
+             * Published At
+             * Format: date-time
+             */
+            published_at: string;
+            /** Recommendation Reason */
+            recommendation_reason?: string | null;
+            /** Source */
+            source: string;
+            /** Summary */
+            summary: string;
+            /** Title */
+            title: string;
+            /** Topics */
+            topics: string[];
+            /** Url */
+            url: string;
+        };
+        /** ExerciseFeedback */
+        ExerciseFeedback: {
+            /** Correct */
+            correct: boolean;
+            /** Expected */
+            expected: string[];
+            /** Explanation */
+            explanation: string;
+            /** Skill */
+            skill: string;
+        };
+        /** ExerciseView */
+        ExerciseView: {
+            /**
+             * Kind
+             * @enum {string}
+             */
+            kind: "choice" | "gap" | "matching" | "comprehension" | "short_answer";
+            /** Options */
+            options: string[];
+            /** Parts */
+            parts: string[];
+            /** Prompt */
+            prompt: string;
+            /** Skill */
+            skill: string;
+        };
+        /** GenerateLesson */
+        GenerateLesson: {
+            /** Cefr */
+            cefr?: ("A1" | "A2" | "B1" | "B2" | "C1" | "C2") | null;
+            /**
+             * Content Id
+             * Format: uuid
+             */
+            content_id: string;
+        };
         /** HealthResponse */
         HealthResponse: {
             /**
@@ -248,6 +450,86 @@ export interface components {
              * @constant
              */
             status: "ok";
+        };
+        /** JobView */
+        JobView: {
+            /**
+             * Cefr
+             * @enum {string}
+             */
+            cefr: "A1" | "A2" | "B1" | "B2" | "C1" | "C2";
+            /**
+             * Content Id
+             * Format: uuid
+             */
+            content_id: string;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Error Code */
+            error_code: string | null;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Lesson Id */
+            lesson_id: string | null;
+            /** Level Reason */
+            level_reason: string;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "queued" | "running" | "succeeded" | "failed";
+        };
+        /** LessonList */
+        LessonList: {
+            /** Items */
+            items: components["schemas"]["JobView"][];
+            /** Total */
+            total: number;
+        };
+        /** LessonView */
+        LessonView: {
+            /** Attempt Count */
+            attempt_count: number;
+            /**
+             * Cefr
+             * @enum {string}
+             */
+            cefr: "A1" | "A2" | "B1" | "B2" | "C1" | "C2";
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Discussion */
+            discussion: string[];
+            /** Exercises */
+            exercises: components["schemas"]["ExerciseView"][];
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Level Reason */
+            level_reason: string;
+            /** Objectives */
+            objectives: string[];
+            /** Prompt Version */
+            prompt_version: string;
+            /** Reading */
+            reading: string;
+            /** Schema Version */
+            schema_version: string;
+            source: components["schemas"]["ContentView"];
+            /** Title */
+            title: string;
+            /** Vocabulary */
+            vocabulary: components["schemas"]["Vocabulary"][];
         };
         /** ProblemDetails */
         ProblemDetails: {
@@ -365,12 +647,24 @@ export interface components {
              */
             id: string;
         };
+        /** SubmitAttempt */
+        SubmitAttempt: {
+            /** Answers */
+            answers: string[][];
+        };
         /** ValidationIssue */
         ValidationIssue: {
             /** Location */
             location: (string | number)[];
             /** Message */
             message: string;
+        };
+        /** Vocabulary */
+        Vocabulary: {
+            /** Meaning */
+            meaning: string;
+            /** Term */
+            term: string;
         };
     };
     responses: never;
@@ -601,6 +895,239 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["StudentAccountResponse"];
+                };
+            };
+            /** @description Request error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    listLearningContent: {
+        parameters: {
+            query?: {
+                topic?: string | null;
+                offset?: number;
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Catalog"];
+                };
+            };
+            /** @description Request error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    getLessonJob: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                job_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["JobView"];
+                };
+            };
+            /** @description Request error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    listLessons: {
+        parameters: {
+            query?: {
+                offset?: number;
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LessonList"];
+                };
+            };
+            /** @description Request error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    prepareLesson: {
+        parameters: {
+            query?: never;
+            header: {
+                "Idempotency-Key": string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["GenerateLesson"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["JobView"];
+                };
+            };
+            /** @description Request error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    getLesson: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                lesson_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LessonView"];
+                };
+            };
+            /** @description Request error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    listExerciseAttempts: {
+        parameters: {
+            query?: {
+                offset?: number;
+                limit?: number;
+            };
+            header?: never;
+            path: {
+                lesson_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AttemptView"][];
+                };
+            };
+            /** @description Request error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    submitExerciseAttempt: {
+        parameters: {
+            query?: never;
+            header: {
+                "Idempotency-Key": string;
+            };
+            path: {
+                lesson_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SubmitAttempt"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AttemptView"];
                 };
             };
             /** @description Request error */

@@ -15,6 +15,7 @@ from lingora.health import router
 from lingora.infrastructure.database import Database
 from lingora.integrations.auth0.verifier import Auth0TokenVerifier
 from lingora.modules.identity.http import router as identity_router
+from lingora.modules.learning.http import router as learning_router
 from lingora.modules.onboarding.http import router as onboarding_router
 
 
@@ -47,6 +48,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.include_router(router)
     app.include_router(identity_router)
     app.include_router(onboarding_router)
+    app.include_router(learning_router)
     register_error_handlers(app)
     register_request_middleware(app, tracer_provider)
     # Outermost application middleware: error responses receive the same CORS headers.
