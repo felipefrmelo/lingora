@@ -1,12 +1,12 @@
 # MCP authorization for Milestone 5
 
-**Status: documented design only. There is no MCP endpoint, registration, account-linking flow, or verified ChatGPT connection in Milestones 1–2.** Recheck current SDK/provider specifications when implementing it.
+**Status: Milestone 5 implementation in progress.** A local MCP listener and session operations exist; Auth0 registration, a real ChatGPT connection, and text/voice acceptance remain unverified. See [conversation sessions](../conversation.md).
 
 ## Resource and identity
 
 Mount a Streamable HTTP MCP adapter in the same monolith using the official Python `mcp` SDK. Tools call application use cases directly; do not forward a bearer token to the REST resource. Both adapters resolve the same exact Auth0 issuer/subject mapping to the internal Student UUID.
 
-Create a separate Auth0 API for the canonical MCP URL, for example `https://mcp.lingora.example/mcp`. Set both `MCP_RESOURCE_URL` and `AUTH0_MCP_AUDIENCE` to that actual canonical resource. Do not accept the REST audience at the MCP boundary or reuse the SPA client as the ChatGPT OAuth client. Reject a token issued for another resource even if its issuer and subject are familiar.
+Create a separate Auth0 API for the canonical MCP URL, for example `https://mcp.lingora.example/mcp`. Set `MCP_RESOURCE_URL` to that actual canonical resource; the MCP verifier uses it as the audience. Do not accept the REST audience at the MCP boundary or reuse the SPA client as the ChatGPT OAuth client. Reject a token issued for another resource even if its issuer and subject are familiar.
 
 ## Authorization and discovery
 

@@ -108,6 +108,58 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/me/conversation-sessions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Sessions */
+        get: operations["listConversationSessions"];
+        put?: never;
+        /** Prepare */
+        post: operations["prepareConversationSession"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/me/conversation-sessions/{identifier}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Session */
+        get: operations["getConversationSession"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/me/conversation-sessions/{identifier}/abandon": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Abandon */
+        post: operations["abandonConversationSession"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/me/lesson-jobs/{job_id}": {
         parameters: {
             query?: never;
@@ -172,6 +224,24 @@ export interface paths {
         put?: never;
         /** Attempt */
         post: operations["submitExerciseAttempt"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/me/mcp-access": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Access */
+        get: operations["getMcpAccess"];
+        /** Put Access */
+        put: operations["setMcpAccess"];
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -531,6 +601,35 @@ export interface components {
             /** Vocabulary */
             vocabulary: components["schemas"]["Vocabulary"][];
         };
+        /** McpAccessView */
+        McpAccessView: {
+            /** Enabled */
+            enabled: boolean;
+        };
+        /** Observation */
+        Observation: {
+            /** Correction */
+            correction?: string | null;
+            /** Example */
+            example?: string | null;
+            /** Feedback */
+            feedback: string;
+            /** Skill */
+            skill: string;
+        };
+        /** PrepareSession */
+        PrepareSession: {
+            /**
+             * Lesson Id
+             * Format: uuid
+             */
+            lesson_id: string;
+            /**
+             * Save Examples
+             * @default true
+             */
+            save_examples: boolean;
+        };
         /** ProblemDetails */
         ProblemDetails: {
             /** Detail */
@@ -633,6 +732,62 @@ export interface components {
             scale?: string | null;
             /** Value */
             value: string;
+        };
+        /** SessionFeedback */
+        SessionFeedback: {
+            /** Observations */
+            observations: components["schemas"]["Observation"][];
+            /** Priorities */
+            priorities: string[];
+            /** Strengths */
+            strengths: string[];
+            /** Summary */
+            summary: string;
+        };
+        /** SessionVersion */
+        SessionVersion: {
+            /** Expected Version */
+            expected_version: number;
+        };
+        /** SessionView */
+        SessionView: {
+            /**
+             * Cefr
+             * @enum {string}
+             */
+            cefr: "A1" | "A2" | "B1" | "B2" | "C1" | "C2";
+            /** Completed At */
+            completed_at: string | null;
+            /**
+             * Correction Mode
+             * @enum {string}
+             */
+            correction_mode: "free" | "balanced" | "intensive";
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            feedback: components["schemas"]["SessionFeedback"] | null;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /**
+             * Lesson Id
+             * Format: uuid
+             */
+            lesson_id: string;
+            /** Save Examples */
+            save_examples: boolean;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "READY" | "IN_PROGRESS" | "COMPLETED" | "ABANDONED";
+            /** Version */
+            version: number;
         };
         /** StudentAccountResponse */
         StudentAccountResponse: {
@@ -941,6 +1096,138 @@ export interface operations {
             };
         };
     };
+    listConversationSessions: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SessionView"][];
+                };
+            };
+            /** @description Request error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    prepareConversationSession: {
+        parameters: {
+            query?: never;
+            header: {
+                "Idempotency-Key": string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PrepareSession"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SessionView"];
+                };
+            };
+            /** @description Request error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    getConversationSession: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                identifier: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SessionView"];
+                };
+            };
+            /** @description Request error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    abandonConversationSession: {
+        parameters: {
+            query?: never;
+            header: {
+                "Idempotency-Key": string;
+            };
+            path: {
+                identifier: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SessionVersion"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SessionView"];
+                };
+            };
+            /** @description Request error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
     getLessonJob: {
         parameters: {
             query?: never;
@@ -1128,6 +1415,68 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["AttemptView"];
+                };
+            };
+            /** @description Request error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    getMcpAccess: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["McpAccessView"];
+                };
+            };
+            /** @description Request error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    setMcpAccess: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["McpAccessView"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["McpAccessView"];
                 };
             };
             /** @description Request error */
