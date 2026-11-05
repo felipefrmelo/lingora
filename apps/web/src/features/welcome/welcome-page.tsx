@@ -52,7 +52,7 @@ export function WelcomePage() {
                   <span className="text-destructive">We couldn’t connect. Please try again.</span>
                 )}
               </div>
-              <p className="mt-3 text-sm leading-relaxed text-muted-foreground">We’re preparing your learning space. Lessons and conversation will be available in a future update.</p>
+              <p className="mt-3 text-sm leading-relaxed text-muted-foreground">Sign in to explore news briefs and practise with lessons. Connected ChatGPT conversation is coming next.</p>
               <Button variant="outline" size="sm" className="mt-5" onClick={() => void health.refetch()} disabled={health.isFetching}>
                 <RotateCw size={14} aria-hidden="true" />
                 {health.isError ? 'Try again' : 'Check connection'}
