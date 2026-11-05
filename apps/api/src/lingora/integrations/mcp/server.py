@@ -2,7 +2,7 @@
 
 from collections.abc import AsyncGenerator, Awaitable, Callable
 from contextlib import asynccontextmanager
-from typing import Any
+from typing import Any, cast
 from urllib.parse import urlsplit
 from uuid import UUID
 
@@ -10,9 +10,11 @@ from mcp.server import MCPServer
 from mcp.server.auth.middleware.auth_context import get_access_token
 from mcp.server.auth.provider import AccessToken
 from mcp.server.auth.settings import AuthSettings
+from mcp.server.context import CallNext, HandlerResult, ServerRequestContext
 from mcp.server.mcpserver.exceptions import ToolError
 from mcp.server.transport_security import TransportSecuritySettings
-from mcp.types import ToolAnnotations
+from mcp.shared.exceptions import MCPError
+from mcp.types import INVALID_PARAMS, ListToolsResult, ToolAnnotations
 from pydantic import AnyHttpUrl
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -70,6 +72,42 @@ class Verifier:
         )
 
 
+TOOL_ARGUMENTS: dict[str, frozenset[str]] = {
+    "get_student_context": frozenset(),
+    "get_pending_session": frozenset(),
+    "get_learning_session": frozenset({"session_id"}),
+    "get_current_lesson": frozenset({"session_id"}),
+    "start_learning_session": frozenset({"session_id", "expected_version", "idempotency_key"}),
+    "update_session_preferences": frozenset({"session_id", "idempotency_key", "preferences"}),
+    "complete_learning_session": frozenset({"session_id", "idempotency_key", "feedback"}),
+}
+
+
+async def restrict_arguments(
+    ctx: ServerRequestContext[Any, Any], call_next: CallNext
+) -> HandlerResult:
+    if ctx.method == "tools/call" and ctx.params:
+        name = ctx.params.get("name")
+        args = ctx.params.get("arguments", {})
+        if isinstance(name, str) and name in TOOL_ARGUMENTS and isinstance(args, dict):
+            if set(cast(dict[str, Any], args)) - TOOL_ARGUMENTS[name]:
+                raise MCPError(INVALID_PARAMS, "Unexpected tool arguments.")
+    result = await call_next(ctx)
+    if ctx.method == "tools/list" and isinstance(result, ListToolsResult):
+        for tool in result.tools:
+            tool.input_schema["additionalProperties"] = False
+    elif ctx.method == "tools/list" and isinstance(result, dict):
+        tools = result.get("tools", [])
+        if isinstance(tools, list):
+            for item in cast(list[Any], tools):
+                if isinstance(item, dict):
+                    entry = cast(dict[str, Any], item)
+                    schema = entry.get("inputSchema")
+                    if isinstance(schema, dict):
+                        cast(dict[str, Any], schema)["additionalProperties"] = False
+    return result
+
+
 def build_server(settings: Settings, database: Database) -> MCPServer[Any]:
     parsed = urlsplit(settings.mcp_resource_url)
     if (
@@ -87,6 +125,7 @@ def build_server(settings: Settings, database: Database) -> MCPServer[Any]:
     server = MCPServer(
         "Lingora",
         instructions=INSTRUCTIONS,
+        middleware=[restrict_arguments],
         token_verifier=Verifier(settings),
         auth=AuthSettings(
             issuer_url=AnyHttpUrl(settings.auth0_issuer),

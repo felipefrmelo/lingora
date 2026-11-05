@@ -195,3 +195,31 @@ async def test_jwks_outage_returns_service_unavailable(
             json=rpc("get_student_context"),
         )
         assert response.status_code == 503
+
+
+async def test_tool_rejects_client_supplied_student_id(
+    mcp_client: AsyncClient, token_factory: TokenFactory
+) -> None:
+    async with mcp_client.server_manager.run():  # type: ignore[attr-defined]
+        token = token_factory({"aud": RESOURCE, "azp": "test-client", "scope": "profile:read"})
+        response = await mcp_client.post(
+            "/mcp",
+            headers={
+                "Accept": "application/json, text/event-stream",
+                "Authorization": "Bearer " + token,
+            },
+            json=rpc("get_student_context", {"student_id": "someone-else"}),
+        )
+        assert response.json()["error"]["code"] == -32602
+        listing = await mcp_client.post(
+            "/mcp",
+            headers={
+                "Accept": "application/json, text/event-stream",
+                "Authorization": "Bearer " + token,
+            },
+            json={"jsonrpc": "2.0", "id": 2, "method": "tools/list", "params": {}},
+        )
+        assert all(
+            tool["inputSchema"]["additionalProperties"] is False
+            for tool in listing.json()["result"]["tools"]
+        )
