@@ -2,7 +2,7 @@
 
 English practice inspired by your world. Lingora will organize personalized lessons, exercises, learning evidence, and progress; ChatGPT will provide conversational practice through MCP.
 
-**Current delivery: Milestone 2 — Authentication.** The application includes Auth0 Universal Login integration, a protected account page, verified JWT authorization, and transactional student provisioning. PostgreSQL, migrations, generated API contracts, tests, and CI remain part of the foundation. Live tenant acceptance is tracked separately in the [authentication guide](docs/auth/auth0-setup.md); automated fixtures alone do not establish real authentication compatibility. Onboarding, learning features, AI generation, and MCP tools are later milestones.
+**Current delivery: Milestone 2 — Authentication.** The application includes Auth0 Universal Login integration, a protected account page, verified JWT authorization, and transactional student provisioning. PostgreSQL, migrations, generated API contracts, tests, and CI remain part of the foundation. The real development-tenant acceptance journey passed; see the [verification report](docs/auth/verification.md) for evidence and limitations. Onboarding, learning features, AI generation, and MCP tools are later milestones.
 
 ## Prerequisites
 

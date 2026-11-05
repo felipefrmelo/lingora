@@ -1,6 +1,6 @@
 # Auth0 authentication
 
-Milestone 2 implements registration/sign-in through Universal Login, logout, and protected self-account access. Automated checks pass; the real-tenant acceptance journey is tracked in [verification](verification.md) and must pass before this milestone is complete.
+Milestone 2 implements registration/sign-in through Universal Login, logout, and protected self-account access. Automated checks and the real development-tenant acceptance journey passed; see [verification](verification.md) for the evidence, user-assisted steps, and shared-tenant limitations.
 
 ## Development resources
 

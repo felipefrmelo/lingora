@@ -1,6 +1,6 @@
 # 0005 — React authentication
 
-Status: Accepted; implemented in Milestone 2, with live acceptance tracked separately. Date: 2026-11-04.
+Status: Accepted; implemented in Milestone 2, with development acceptance verified on 2026-11-05. Decision date: 2026-11-04.
 
 Context: A browser SPA cannot safely store client secrets or replace backend authorization with route guards.
 
