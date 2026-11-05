@@ -15,3 +15,5 @@ Accepted decisions describe the foundation and intended integration boundaries, 
 10. [Optional onboarding and original assessments](0010-onboarding-and-assessments.md)
 
 11. [Licensed briefs, lessons, and durable workers](0011-content-lessons-and-worker.md)
+
+12. [Conversation sessions and MCP access](0012-conversation-sessions.md)
