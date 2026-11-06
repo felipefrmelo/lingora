@@ -110,7 +110,8 @@ async def restrict_arguments(
                 metadata = f"{resource.scheme}://{resource.netloc}/.well-known/oauth-protected-resource/mcp"
                 challenge = (
                     f'Bearer resource_metadata="{metadata}", error="insufficient_scope", '
-                    f'error_description="Additional permission is required", scope="{" ".join(needed)}"'
+                    'error_description="Additional permission is required", '
+                    f'scope="{" ".join(needed)}"'
                 )
                 return CallToolResult.model_validate(
                     {
