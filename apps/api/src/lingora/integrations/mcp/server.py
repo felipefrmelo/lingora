@@ -45,7 +45,8 @@ up to three priorities, then call complete_learning_session. State that feedback
 only after the tool confirms success. If saving fails, explain it and retry with the same
 idempotency key and payload. Never assume a voice disconnect completes the session. Do not
 claim mastery or infer pronunciation without suitable evidence. Do not submit quotations
-when the session does not allow examples."""
+when the session does not allow examples. In that case do not include quotations or
+examples in any feedback field, including summary, strengths, priorities, or observations."""
 
 
 class Verifier:
@@ -194,7 +195,10 @@ def build_server(settings: Settings, database: Database) -> MCPServer[Any]:
             except VersionConflict:
                 raise ToolError("The session changed. Reload it before retrying.") from None
             except application.ExamplesDisabled:
-                raise ToolError("Examples are disabled for this session.") from None
+                raise ToolError(
+                    "Examples are disabled. Remove quotations and examples "
+                    "from all feedback fields."
+                ) from None
             except ToolError:
                 raise
             except SQLAlchemyError:

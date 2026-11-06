@@ -1,5 +1,6 @@
 """Conversation operations shared by HTTP and MCP adapters."""
 
+import re
 from datetime import UTC, datetime
 from uuid import UUID
 
@@ -26,6 +27,20 @@ from lingora.modules.onboarding.models import StudentProfile
 
 class ExamplesDisabled(Exception):
     pass
+
+
+def contains_quotation(text: str) -> bool:
+    """Detect explicit quotation marks without treating ordinary apostrophes as quotes."""
+    return bool(re.search(r'["“”„«»‹›‘]|(?<!\w)\'[^\'\n]+\'(?!\w)', text))
+
+
+def contains_examples(completion: CompleteSession) -> bool:
+    text = [completion.summary, *completion.strengths, *completion.priorities]
+    for observation in completion.observations:
+        if observation.example or observation.correction:
+            return True
+        text.extend((observation.skill, observation.feedback))
+    return any(contains_quotation(value) for value in text)
 
 
 async def session_owned(
@@ -174,9 +189,7 @@ async def change(
         elif action == "preferences" and preferences:
             row.correction_mode = preferences.correction_mode
         elif action == "complete" and completion:
-            if not row.save_examples and any(
-                o.example or o.correction for o in completion.observations
-            ):
+            if not row.save_examples and contains_examples(completion):
                 raise ExamplesDisabled
             row.feedback = completion.model_dump(mode="json", exclude={"expected_version"})
             row.status = "COMPLETED"

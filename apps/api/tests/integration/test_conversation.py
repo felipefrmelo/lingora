@@ -85,18 +85,33 @@ async def test_completion_is_atomic_and_replayable(
         issuer=ISSUER, subject="auth0|student-one", scopes=frozenset({"profile:write"})
     )
     key = uuid4()
-    invalid = CompleteSession(
-        expected_version=1,
-        summary="Good work",
-        observations=[
-            Observation(skill="grammar", feedback="Try the past tense", example="I go yesterday")
-        ],
+    invalid_payloads = [
+        CompleteSession(expected_version=1, summary='You said "I go yesterday".'),
+        CompleteSession(expected_version=1, summary="Good work", strengths=["You said 'I go'."]),
+        CompleteSession(expected_version=1, summary="Good work", priorities=["Change ‘I go’."]),
+        CompleteSession(
+            expected_version=1,
+            summary="Good work",
+            observations=[Observation(skill="grammar", feedback="You said «I go».")],
+        ),
+        CompleteSession(
+            expected_version=1,
+            summary="Good work",
+            observations=[
+                Observation(
+                    skill="grammar", feedback="Try the past tense", example="I go yesterday"
+                )
+            ],
+        ),
+    ]
+    for invalid in invalid_payloads:
+        with pytest.raises(application.ExamplesDisabled):
+            await application.change(
+                session, principal, identifier, 1, "complete", key, completion=invalid
+            )
+    saved = CompleteSession(
+        expected_version=1, summary="Good work", priorities=["Don't omit past tense"]
     )
-    with pytest.raises(application.ExamplesDisabled):
-        await application.change(
-            session, principal, identifier, 1, "complete", key, completion=invalid
-        )
-    saved = CompleteSession(expected_version=1, summary="Good work", priorities=["Past tense"])
     completed = await application.change(
         session, principal, identifier, 1, "complete", key, completion=saved
     )
