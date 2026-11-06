@@ -100,6 +100,7 @@ async def test_tool_requires_enabled_student_and_scope(
         assert not enabled.json()["result"].get("isError", False)
         denied = await mcp_client.post("/mcp", headers=headers, json=rpc("get_pending_session"))
         assert denied.json()["result"]["isError"] is True
+        assert "insufficient_scope" in denied.json()["result"]["_meta"]["mcp/www_authenticate"][0]
         await account_client.put("/api/v1/me/mcp-access", headers=owner, json={"enabled": False})
         revoked = await mcp_client.post("/mcp", headers=headers, json=request)
         assert revoked.json()["result"]["isError"] is True

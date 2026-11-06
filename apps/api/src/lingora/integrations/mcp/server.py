@@ -14,7 +14,7 @@ from mcp.server.context import CallNext, HandlerResult, ServerRequestContext
 from mcp.server.mcpserver.exceptions import ToolError
 from mcp.server.transport_security import TransportSecuritySettings
 from mcp.shared.exceptions import MCPError
-from mcp.types import INVALID_PARAMS, ListToolsResult, ToolAnnotations
+from mcp.types import INVALID_PARAMS, CallToolResult, ListToolsResult, ToolAnnotations
 from pydantic import AnyHttpUrl
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -83,6 +83,17 @@ TOOL_ARGUMENTS: dict[str, frozenset[str]] = {
 }
 
 
+TOOL_SCOPES = {
+    "get_student_context": ("profile:read",),
+    "get_pending_session": ("sessions:read",),
+    "get_learning_session": ("sessions:read",),
+    "get_current_lesson": ("lessons:read", "sessions:read"),
+    "start_learning_session": ("sessions:write",),
+    "update_session_preferences": ("sessions:write",),
+    "complete_learning_session": ("sessions:write",),
+}
+
+
 async def restrict_arguments(
     ctx: ServerRequestContext[Any, Any], call_next: CallNext
 ) -> HandlerResult:
@@ -92,6 +103,24 @@ async def restrict_arguments(
         if isinstance(name, str) and name in TOOL_ARGUMENTS and isinstance(args, dict):
             if set(cast(dict[str, Any], args)) - TOOL_ARGUMENTS[name]:
                 raise MCPError(INVALID_PARAMS, "Unexpected tool arguments.")
+            token = get_access_token()
+            needed = TOOL_SCOPES[name]
+            if token and not set(needed).issubset(token.scopes):
+                resource = urlsplit(token.resource or "")
+                metadata = f"{resource.scheme}://{resource.netloc}/.well-known/oauth-protected-resource/mcp"
+                challenge = (
+                    f'Bearer resource_metadata="{metadata}", error="insufficient_scope", '
+                    f'error_description="Additional permission is required", scope="{" ".join(needed)}"'
+                )
+                return CallToolResult.model_validate(
+                    {
+                        "content": [
+                            {"type": "text", "text": "Additional authorization is required."}
+                        ],
+                        "isError": True,
+                        "_meta": {"mcp/www_authenticate": [challenge]},
+                    }
+                )
     result = await call_next(ctx)
     if ctx.method == "tools/list" and isinstance(result, ListToolsResult):
         for tool in result.tools:
