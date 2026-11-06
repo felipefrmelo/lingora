@@ -39,8 +39,18 @@ async def student_for(
     student = await find_student(session, principal)
     if student is None:
         raise ResourceNotFound
-    if lock:
+    if lock or principal.mcp:
         await session.scalar(select(Student).where(Student.id == student.id).with_for_update())
+    if principal.mcp:
+        # Serialize the access check with a concurrent disconnect and the ensuing write.
+        from lingora.modules.conversation.models import McpAccess
+        from lingora.modules.identity.principal import AuthorizationDenied
+
+        access = await session.get(McpAccess, student.id)
+        if not access or not access.enabled or principal.issued_at is None:
+            raise AuthorizationDenied
+        if access.revoked_before and principal.issued_at <= int(access.revoked_before.timestamp()):
+            raise AuthorizationDenied
     return student
 
 

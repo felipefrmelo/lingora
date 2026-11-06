@@ -15,8 +15,17 @@ from lingora.modules.identity.principal import (
 
 
 class Auth0TokenVerifier:
-    def __init__(self, settings: Settings, *, jwks: PyJWKClient | None = None) -> None:
+    def __init__(
+        self,
+        settings: Settings,
+        *,
+        jwks: PyJWKClient | None = None,
+        audience: str | None = None,
+        allowed_clients: frozenset[str] | None = None,
+    ) -> None:
         self.settings = settings
+        self.audience = audience or settings.auth0_api_audience
+        self.allowed_clients = allowed_clients
         self.jwks = jwks
         if self.jwks is None and settings.auth0_configured:
             self.jwks = PyJWKClient(
@@ -49,7 +58,7 @@ class Auth0TokenVerifier:
                 key.key,
                 algorithms=["RS256"],
                 issuer=self.settings.auth0_issuer,
-                audience=self.settings.auth0_api_audience,
+                audience=self.audience,
                 options={"require": ["exp", "iss", "aud", "sub", "iat"]},
             )
         except PyJWKClientConnectionError:
@@ -64,6 +73,14 @@ class Auth0TokenVerifier:
             raise InvalidCredentials
         if claims.get(self.settings.auth0_email_verified_claim) is not True:
             raise AuthorizationDenied
+        client_id = claims.get("azp")
+        issued_at = claims.get("iat")
+        if self.allowed_clients is not None and (
+            not isinstance(client_id, str)
+            or client_id not in self.allowed_clients
+            or type(issued_at) is not int
+        ):
+            raise InvalidCredentials
         scope = claims.get("scope", "")
         if not isinstance(scope, str):
             raise InvalidCredentials
@@ -71,4 +88,6 @@ class Auth0TokenVerifier:
             issuer=self.settings.auth0_issuer,
             subject=subject,
             scopes=frozenset(scope.split()),
+            issued_at=issued_at if type(issued_at) is int else None,
+            client_id=client_id if isinstance(client_id, str) else None,
         )

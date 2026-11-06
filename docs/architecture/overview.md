@@ -2,14 +2,14 @@
 
 ## Delivery boundary
 
-This is a modular monolith with a React SPA and one Python deployment. Milestone 4 adds licensed brief ingestion, private generated reading lessons, deterministic exercises, and saved attempts to authenticated onboarding. The PRD defines the full product; the initialization guidelines split it into seven technical milestones. MCP, adaptive plans, and mastery estimates remain later deliveries.
+This is a modular monolith with a React SPA and one Python deployment. Milestone 4 adds licensed brief ingestion, private generated reading lessons, deterministic exercises, and saved attempts to authenticated onboarding. The PRD defines the full product; the initialization guidelines split it into seven technical milestones. Milestone 5 adds conversation sessions and a protected MCP listener; real ChatGPT text and voice acceptance remain pending. Adaptive plans and mastery estimates remain later deliveries.
 
 ## Runtime and dependency flow
 
 ```text
 React routes/features -> TanStack Query -> generated API client -> FastAPI
                                                                |
-Future ChatGPT -> OAuth-protected MCP adapter ------------------+-> application use cases
+ChatGPT -> OAuth-protected MCP adapter ------------------+-> application use cases
                                                                     |
                                                                business modules
                                                                     |

@@ -7,6 +7,7 @@ import { Button } from '../../components/ui/button'
 import { useUnsavedChanges } from '../onboarding/hooks'
 import { RequestFailure } from '../onboarding/shared'
 import { SourceCredit } from './catalog-page'
+import { PrepareConversation } from '../conversation/pages'
 import { useLessonApi, type Attempt, type Lesson } from './api'
 
 function Feedback({ attempt }: { attempt: Attempt }) {
@@ -47,7 +48,8 @@ function StudyLesson({ lesson }: { lesson: Lesson }) {
       <Button disabled={submit.isPending} type="submit">{submit.isPending ? 'Saving your answers…' : 'Save answers and check'}</Button><p className="text-sm text-muted-foreground">Answers are saved only after confirmation. Your selected CEFR stays unchanged.</p>
     </form>
     {latest && <section aria-label="Latest feedback" role="status"><Feedback attempt={latest} /></section>}
-    <section className="form-section"><h2 className="font-display text-3xl">Conversation starters</h2><ul className="mt-5 list-disc space-y-3 pl-5">{lesson.discussion.map(question => <li key={question}>{question}</li>)}</ul><p className="mt-5 text-sm text-muted-foreground">Try these aloud or write a few thoughts. Connected ChatGPT conversation practice arrives in the next milestone.</p></section>
+    <section className="form-section"><h2 className="font-display text-3xl">Conversation starters</h2><ul className="mt-5 list-disc space-y-3 pl-5">{lesson.discussion.map(question => <li key={question}>{question}</li>)}</ul><p className="mt-5 text-sm text-muted-foreground">Try these aloud or prepare a conversation below.</p></section>
+    <PrepareConversation lessonId={lesson.id} />
     <section aria-labelledby="attempts-title"><h2 id="attempts-title" className="font-display text-3xl">Saved practice</h2>{history.isPending ? <p role="status" className="mt-4">Loading saved attempts…</p> : history.isError ? <RequestFailure error={history.error} retry={() => void history.refetch()} /> : <><div className="mt-5 space-y-5">{history.data.map(attempt => <Feedback key={attempt.id} attempt={attempt} />)}{!history.data.length && <p>Your first saved attempt will appear here.</p>}</div><div className="mt-4 flex gap-3"><Button variant="outline" disabled={!offset} onClick={() => setOffset(Math.max(0, offset - 12))}>Newer attempts</Button><Button variant="outline" disabled={history.data.length < 12} onClick={() => setOffset(offset + 12)}>Older attempts</Button></div></>}
     </section>
   </div>

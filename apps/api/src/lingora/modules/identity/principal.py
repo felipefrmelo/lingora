@@ -6,6 +6,9 @@ class AuthenticatedPrincipal:
     issuer: str
     subject: str
     scopes: frozenset[str]
+    issued_at: int | None = None
+    client_id: str | None = None
+    mcp: bool = False
 
 
 class InvalidCredentials(Exception):
