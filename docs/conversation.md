@@ -1,6 +1,6 @@
 # Conversation sessions and MCP
 
-Milestone 5 is in progress. Automated local checks do not establish ChatGPT, Auth0, ngrok, or voice interoperability; the real development journey remains a completion gate.
+Milestone 5 is in progress. Automated local checks do not establish ChatGPT, Auth0, ngrok, or voice interoperability; the real development journey remains a completion gate. See [development verification](auth/mcp-verification.md) for actual configuration and results.
 
 A learner can prepare one unfinished session from a saved lesson, choose whether to retain short examples, and abandon an unfinished session before starting another. The session snapshots its lesson's target level and the profile's correction mode. ChatGPT may change the session correction mode without editing the profile. A conversation is complete only after a feedback write commits. A disconnected chat or voice call does not complete it.
 
