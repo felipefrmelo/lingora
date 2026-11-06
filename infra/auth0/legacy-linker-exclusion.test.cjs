@@ -20,8 +20,11 @@ test('unrelated existing accounts keep their legacy linking behavior', () => {
 })
 
 test('MCP exclusion requires both the approved client and the Lingora resource', () => {
-  const event = { client: { client_id: 'chatgpt' }, resource_server: { identifier: 'https://mcp.example/mcp' }, user: {} }
-  assert.equal(skipLegacyLinking(event, 'lingora', 'https://mcp.example/mcp', 'chatgpt'), true)
-  assert.equal(skipLegacyLinking(event, 'lingora', 'https://other.example/mcp', 'chatgpt'), false)
-  assert.equal(skipLegacyLinking(event, 'lingora', 'https://mcp.example/mcp', 'other'), false)
+  const event = { client: { client_id: 'chatgpt' }, resource_server: { identifier: 'https://mcp.example/mcp' }, user: {}, secrets: { LINGORA_MCP_RESOURCE_URL: 'https://mcp.example/mcp', LINGORA_MCP_CLIENT_IDS: 'chatgpt' } }
+  assert.equal(skipLegacyLinking(event, 'lingora'), true)
+  event.secrets.LINGORA_MCP_RESOURCE_URL = 'https://other.example/mcp'
+  assert.equal(skipLegacyLinking(event, 'lingora'), false)
+  event.secrets.LINGORA_MCP_RESOURCE_URL = 'https://mcp.example/mcp'
+  event.secrets.LINGORA_MCP_CLIENT_IDS = 'other'
+  assert.equal(skipLegacyLinking(event, 'lingora'), false)
 })
