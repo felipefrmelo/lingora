@@ -17,7 +17,15 @@ export function PrepareConversation({ lessonId }: { lessonId: string }) {
     if (!key.current || key.current.examples !== examples) key.current = { examples, id: crypto.randomUUID() }
     return api.prepare(lessonId, examples, key.current.id)
   }, onSuccess: async session => { await navigate({ to: '/app/sessions/$sessionId', params: { sessionId: session.id } }) } })
-  return <section className="form-section"><h2 className="font-display text-3xl">Practise with ChatGPT</h2><p className="mt-3 text-sm text-muted-foreground">Prepare this lesson for a conversation. ChatGPT can save feedback at the end.</p><label className="mt-4 flex gap-3"><input type="checkbox" checked={examples} onChange={event => setExamples(event.target.checked)} /> Save short examples in final feedback</label><p className="mt-2 text-xs text-muted-foreground">Lingora does not save full transcripts or recordings.</p><Button className="mt-4" disabled={prepare.isPending} onClick={() => prepare.mutate()}>{prepare.isPending ? 'Preparing…' : 'Practice with ChatGPT'}</Button>{prepare.isError && <RequestFailure error={prepare.error} />}<p className="mt-4 text-sm"><Link to="/app/sessions" className="underline">View conversation sessions</Link></p></section>
+  return <section className="form-section">
+    <h2 className="font-display text-3xl">Practise with ChatGPT</h2>
+    <p className="mt-3 text-sm text-muted-foreground">Prepare this lesson for a conversation. ChatGPT can save feedback at the end.</p>
+    <label className="mt-4 flex gap-3"><input type="checkbox" checked={examples} onChange={event => setExamples(event.target.checked)} aria-describedby="feedback-examples-help" /> Save short examples in final feedback</label>
+    <p id="feedback-examples-help" className="mt-2 text-xs text-muted-foreground">If you turn this off, saved feedback uses preset phrases and includes no examples or observations. Lingora does not save full transcripts or recordings.</p>
+    <Button className="mt-4" disabled={prepare.isPending} onClick={() => prepare.mutate()}>{prepare.isPending ? 'Preparing…' : 'Practice with ChatGPT'}</Button>
+    {prepare.isError && <RequestFailure error={prepare.error} />}
+    <p className="mt-4 text-sm"><Link to="/app/sessions" className="underline">View conversation sessions</Link></p>
+  </section>
 }
 
 function AccessControl() {
