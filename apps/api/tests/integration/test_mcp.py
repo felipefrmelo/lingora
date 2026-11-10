@@ -9,6 +9,7 @@ from pydantic import SecretStr
 from lingora.core.config import Settings
 from lingora.infrastructure.database import Database
 from lingora.integrations.mcp.server import build_mcp_app
+from lingora.modules.conversation import summary_only
 from tests.auth_support import JwksEndpoint, TokenFactory
 from tests.integration.test_authenticated_accounts import account_client as account_client
 from tests.integration.test_conversation import lesson_id as lesson_id
@@ -181,6 +182,59 @@ async def test_mcp_conversation_completion_is_persisted_and_idempotent(
         assert saved.json()["status"] == "COMPLETED"
 
 
+async def test_summary_only_tools_expose_and_enforce_fixed_phrases(
+    mcp_client: AsyncClient,
+    account_client: AsyncClient,
+    owner: dict[str, str],
+    token_factory: TokenFactory,
+    lesson_id: UUID,
+) -> None:
+    from uuid import uuid4
+
+    async with mcp_client.server_manager.run():  # type: ignore[attr-defined]
+        response = await account_client.post(
+            "/api/v1/me/conversation-sessions",
+            headers={**owner, "Idempotency-Key": str(uuid4())},
+            json={"lesson_id": str(lesson_id), "save_examples": False},
+        )
+        identifier = response.json()["id"]
+        await account_client.put("/api/v1/me/mcp-access", headers=owner, json={"enabled": True})
+        token = token_factory(
+            {"aud": RESOURCE, "azp": "test-client", "scope": "sessions:read sessions:write"}
+        )
+        headers = {
+            "Accept": "application/json, text/event-stream",
+            "Authorization": "Bearer " + token,
+        }
+        pending = await mcp_client.post("/mcp", headers=headers, json=rpc("get_pending_session"))
+        assert (
+            pending.json()["result"]["structuredContent"]["summary_only_options"]
+            == summary_only.options()
+        )
+        detail = await mcp_client.post(
+            "/mcp", headers=headers, json=rpc("get_learning_session", {"session_id": identifier})
+        )
+        assert (
+            detail.json()["result"]["structuredContent"]["summary_only_options"]
+            == summary_only.options()
+        )
+        key = str(uuid4())
+        payload: dict[str, object] = {
+            "session_id": identifier,
+            "idempotency_key": key,
+            "feedback": {"expected_version": 1, "summary": "Unquoted learner words"},
+        }
+        rejected = await mcp_client.post(
+            "/mcp", headers=headers, json=rpc("complete_learning_session", payload)
+        )
+        assert rejected.json()["result"]["isError"] is True
+        payload["feedback"] = {"expected_version": 1, "summary": summary_only.SUMMARIES[0]}
+        accepted = await mcp_client.post(
+            "/mcp", headers=headers, json=rpc("complete_learning_session", payload)
+        )
+        assert accepted.json()["result"]["structuredContent"]["status"] == "COMPLETED"
+
+
 async def test_jwks_outage_returns_service_unavailable(
     mcp_client: AsyncClient, token_factory: TokenFactory, jwks_endpoint: JwksEndpoint
 ) -> None:
@@ -224,3 +278,11 @@ async def test_tool_rejects_client_supplied_student_id(
             tool["inputSchema"]["additionalProperties"] is False
             for tool in listing.json()["result"]["tools"]
         )
+        tools = {tool["name"]: tool for tool in listing.json()["result"]["tools"]}
+        for name in (
+            "start_learning_session",
+            "update_session_preferences",
+            "complete_learning_session",
+        ):
+            key = tools[name]["inputSchema"]["properties"]["idempotency_key"]
+            assert key["format"] == "uuid" and "reuse" in key["description"]

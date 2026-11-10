@@ -1,12 +1,12 @@
 """Conversation operations shared by HTTP and MCP adapters."""
 
-import re
 from datetime import UTC, datetime
 from uuid import UUID
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from lingora.modules.conversation import summary_only
 from lingora.modules.conversation.contracts import (
     CompleteSession,
     PrepareSession,
@@ -25,22 +25,17 @@ from lingora.modules.onboarding.contracts import ResourceNotFound, VersionConfli
 from lingora.modules.onboarding.models import StudentProfile
 
 
-class ExamplesDisabled(Exception):
+class SummaryOnlyPolicyError(Exception):
     pass
 
 
-def contains_quotation(text: str) -> bool:
-    """Detect explicit quotation marks without treating ordinary apostrophes as quotes."""
-    return bool(re.search(r'["“”„«»‹›‘]|(?<!\w)\'[^\'\n]+\'(?!\w)', text))
-
-
-def contains_examples(completion: CompleteSession) -> bool:
-    text = [completion.summary, *completion.strengths, *completion.priorities]
-    for observation in completion.observations:
-        if observation.example or observation.correction:
-            return True
-        text.extend((observation.skill, observation.feedback))
-    return any(contains_quotation(value) for value in text)
+def valid_summary_only_feedback(completion: CompleteSession) -> bool:
+    return (
+        completion.summary in summary_only.SUMMARIES
+        and all(value in summary_only.STRENGTHS for value in completion.strengths)
+        and all(value in summary_only.PRIORITIES for value in completion.priorities)
+        and not completion.observations
+    )
 
 
 async def session_owned(
@@ -189,8 +184,8 @@ async def change(
         elif action == "preferences" and preferences:
             row.correction_mode = preferences.correction_mode
         elif action == "complete" and completion:
-            if not row.save_examples and contains_examples(completion):
-                raise ExamplesDisabled
+            if not row.save_examples and not valid_summary_only_feedback(completion):
+                raise SummaryOnlyPolicyError
             row.feedback = completion.model_dump(mode="json", exclude={"expected_version"})
             row.status = "COMPLETED"
             row.completed_at = datetime.now(UTC)

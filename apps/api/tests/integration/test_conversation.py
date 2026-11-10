@@ -6,7 +6,7 @@ from httpx import AsyncClient
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
-from lingora.modules.conversation import application
+from lingora.modules.conversation import application, summary_only
 from lingora.modules.conversation.contracts import CompleteSession, Observation
 from lingora.modules.conversation.models import ConversationEvent, ConversationSession
 from lingora.modules.identity.principal import AuthenticatedPrincipal
@@ -86,17 +86,21 @@ async def test_completion_is_atomic_and_replayable(
     )
     key = uuid4()
     invalid_payloads = [
-        CompleteSession(expected_version=1, summary='You said "I go yesterday".'),
-        CompleteSession(expected_version=1, summary="Good work", strengths=["You said 'I go'."]),
-        CompleteSession(expected_version=1, summary="Good work", priorities=["Change ‘I go’."]),
+        CompleteSession(expected_version=1, summary="I go yesterday"),
         CompleteSession(
-            expected_version=1,
-            summary="Good work",
-            observations=[Observation(skill="grammar", feedback="You said «I go».")],
+            expected_version=1, summary=summary_only.SUMMARIES[0], strengths=["I go yesterday"]
+        ),
+        CompleteSession(
+            expected_version=1, summary=summary_only.SUMMARIES[0], priorities=["I go yesterday"]
         ),
         CompleteSession(
             expected_version=1,
-            summary="Good work",
+            summary=summary_only.SUMMARIES[0],
+            observations=[Observation(skill="grammar", feedback="I go yesterday")],
+        ),
+        CompleteSession(
+            expected_version=1,
+            summary=summary_only.SUMMARIES[0],
             observations=[
                 Observation(
                     skill="grammar", feedback="Try the past tense", example="I go yesterday"
@@ -105,12 +109,15 @@ async def test_completion_is_atomic_and_replayable(
         ),
     ]
     for invalid in invalid_payloads:
-        with pytest.raises(application.ExamplesDisabled):
+        with pytest.raises(application.SummaryOnlyPolicyError):
             await application.change(
                 session, principal, identifier, 1, "complete", key, completion=invalid
             )
     saved = CompleteSession(
-        expected_version=1, summary="Good work", priorities=["Don't omit past tense"]
+        expected_version=1,
+        summary=summary_only.SUMMARIES[0],
+        strengths=[summary_only.STRENGTHS[0]],
+        priorities=[summary_only.PRIORITIES[0]],
     )
     completed = await application.change(
         session, principal, identifier, 1, "complete", key, completion=saved
@@ -135,7 +142,7 @@ async def test_completion_is_atomic_and_replayable(
     history = await account_client.get(
         f"/api/v1/me/conversation-sessions/{identifier}", headers=owner
     )
-    assert history.json()["feedback"]["summary"] == "Good work"
+    assert history.json()["feedback"]["summary"] == summary_only.SUMMARIES[0]
 
 
 async def test_mcp_access_defaults_disabled_and_revokes_older_tokens(

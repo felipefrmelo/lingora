@@ -29,11 +29,25 @@ class Observation(Contract):
 
 class CompleteSession(Contract):
     expected_version: int = Field(ge=1, strict=True)
-    summary: Annotated[str, StringConstraints(strip_whitespace=True, min_length=1, max_length=2000)]
-    strengths: list[ShortText] = Field(default_factory=list, max_length=3)
-    priorities: list[ShortText] = Field(default_factory=list, max_length=3)
+    summary: Annotated[
+        str, StringConstraints(strip_whitespace=True, min_length=1, max_length=2000)
+    ] = Field(
+        description="For summary-only sessions, use an exact phrase from summary_only_options."
+    )
+    strengths: list[ShortText] = Field(
+        default_factory=list,
+        max_length=3,
+        description="For summary-only sessions, use only exact supported strength phrases.",
+    )
+    priorities: list[ShortText] = Field(
+        default_factory=list,
+        max_length=3,
+        description="For summary-only sessions, use only exact supported priority phrases.",
+    )
     observations: list[Observation] = Field(
-        default_factory=lambda: list[Observation](), max_length=6
+        default_factory=lambda: list[Observation](),
+        max_length=6,
+        description="Do not send observations when short examples are disabled.",
     )
 
 
