@@ -35,6 +35,9 @@ ingest-content:
 dev-worker:
 	$(UV) run --project apps/api python -m lingora.learning_cli worker
 
+dev-mcp:
+	$(UV) run --project apps/api uvicorn lingora.mcp_main:app --host 127.0.0.1 --port 8080 --no-access-log
+
 api-generate:
 	$(UV) run --project apps/api python apps/api/scripts/export_openapi.py
 	$(PNPM) --filter @lingora/api-client generate

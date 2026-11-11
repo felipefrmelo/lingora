@@ -14,6 +14,8 @@ from lingora.core.observability import (
 from lingora.health import router
 from lingora.infrastructure.database import Database
 from lingora.integrations.auth0.verifier import Auth0TokenVerifier
+from lingora.modules.conversation.access_http import router as access_router
+from lingora.modules.conversation.http import router as conversation_router
 from lingora.modules.identity.http import router as identity_router
 from lingora.modules.learning.http import router as learning_router
 from lingora.modules.onboarding.http import router as onboarding_router
@@ -47,6 +49,8 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.state.token_verifier = Auth0TokenVerifier(settings)
     app.include_router(router)
     app.include_router(identity_router)
+    app.include_router(conversation_router)
+    app.include_router(access_router)
     app.include_router(onboarding_router)
     app.include_router(learning_router)
     register_error_handlers(app)

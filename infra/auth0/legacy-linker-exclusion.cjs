@@ -9,7 +9,10 @@ function isLingoraAccount(user) {
 }
 
 function skipLegacyLinking(event, lingoraClientId) {
-  return Boolean(lingoraClientId && event.client?.client_id === lingoraClientId)
+  const clients = (event.secrets?.LINGORA_MCP_CLIENT_IDS || '').split(',').map(x => x.trim()).filter(Boolean)
+  const resource = event.secrets?.LINGORA_MCP_RESOURCE_URL
+  const lingoraMcp = Boolean(resource && event.resource_server?.identifier === resource && clients.includes(event.client?.client_id))
+  return lingoraMcp || Boolean(lingoraClientId && event.client?.client_id === lingoraClientId)
     || event.connection?.name === LINGORA_DATABASE_CONNECTION
     || isLingoraAccount(event.user)
 }

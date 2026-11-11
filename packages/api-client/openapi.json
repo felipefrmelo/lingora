@@ -867,6 +867,89 @@
         "title": "LessonView",
         "type": "object"
       },
+      "McpAccessView": {
+        "additionalProperties": false,
+        "properties": {
+          "enabled": {
+            "title": "Enabled",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "enabled"
+        ],
+        "title": "McpAccessView",
+        "type": "object"
+      },
+      "Observation": {
+        "additionalProperties": false,
+        "properties": {
+          "correction": {
+            "anyOf": [
+              {
+                "maxLength": 300,
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Correction"
+          },
+          "example": {
+            "anyOf": [
+              {
+                "maxLength": 300,
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Example"
+          },
+          "feedback": {
+            "maxLength": 300,
+            "minLength": 1,
+            "title": "Feedback",
+            "type": "string"
+          },
+          "skill": {
+            "maxLength": 300,
+            "minLength": 1,
+            "title": "Skill",
+            "type": "string"
+          }
+        },
+        "required": [
+          "skill",
+          "feedback"
+        ],
+        "title": "Observation",
+        "type": "object"
+      },
+      "PrepareSession": {
+        "additionalProperties": false,
+        "properties": {
+          "lesson_id": {
+            "format": "uuid",
+            "title": "Lesson Id",
+            "type": "string"
+          },
+          "save_examples": {
+            "default": true,
+            "title": "Save Examples",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "lesson_id"
+        ],
+        "title": "PrepareSession",
+        "type": "object"
+      },
       "ProblemDetails": {
         "properties": {
           "detail": {
@@ -1226,6 +1309,154 @@
           "value"
         ],
         "title": "Score",
+        "type": "object"
+      },
+      "SessionFeedback": {
+        "additionalProperties": false,
+        "properties": {
+          "observations": {
+            "items": {
+              "$ref": "#/components/schemas/Observation"
+            },
+            "title": "Observations",
+            "type": "array"
+          },
+          "priorities": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Priorities",
+            "type": "array"
+          },
+          "strengths": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Strengths",
+            "type": "array"
+          },
+          "summary": {
+            "title": "Summary",
+            "type": "string"
+          }
+        },
+        "required": [
+          "summary",
+          "strengths",
+          "priorities",
+          "observations"
+        ],
+        "title": "SessionFeedback",
+        "type": "object"
+      },
+      "SessionVersion": {
+        "additionalProperties": false,
+        "properties": {
+          "expected_version": {
+            "minimum": 1.0,
+            "title": "Expected Version",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "expected_version"
+        ],
+        "title": "SessionVersion",
+        "type": "object"
+      },
+      "SessionView": {
+        "additionalProperties": false,
+        "properties": {
+          "cefr": {
+            "enum": [
+              "A1",
+              "A2",
+              "B1",
+              "B2",
+              "C1",
+              "C2"
+            ],
+            "title": "Cefr",
+            "type": "string"
+          },
+          "completed_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Completed At"
+          },
+          "correction_mode": {
+            "enum": [
+              "free",
+              "balanced",
+              "intensive"
+            ],
+            "title": "Correction Mode",
+            "type": "string"
+          },
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "feedback": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/SessionFeedback"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "lesson_id": {
+            "format": "uuid",
+            "title": "Lesson Id",
+            "type": "string"
+          },
+          "save_examples": {
+            "title": "Save Examples",
+            "type": "boolean"
+          },
+          "status": {
+            "enum": [
+              "READY",
+              "IN_PROGRESS",
+              "COMPLETED",
+              "ABANDONED"
+            ],
+            "title": "Status",
+            "type": "string"
+          },
+          "version": {
+            "title": "Version",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "lesson_id",
+          "status",
+          "cefr",
+          "correction_mode",
+          "save_examples",
+          "version",
+          "created_at",
+          "completed_at",
+          "feedback"
+        ],
+        "title": "SessionView",
         "type": "object"
       },
       "StudentAccountResponse": {
@@ -1768,6 +1999,218 @@
         ]
       }
     },
+    "/api/v1/me/conversation-sessions": {
+      "get": {
+        "operationId": "listConversationSessions",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/SessionView"
+                  },
+                  "title": "Response Listconversationsessions",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "default": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Request error"
+          }
+        },
+        "security": [
+          {
+            "Auth0AccessToken": []
+          }
+        ],
+        "summary": "List Sessions",
+        "tags": [
+          "conversation"
+        ]
+      },
+      "post": {
+        "operationId": "prepareConversationSession",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Idempotency-Key",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Idempotency-Key",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PrepareSession"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SessionView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "default": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Request error"
+          }
+        },
+        "security": [
+          {
+            "Auth0AccessToken": []
+          }
+        ],
+        "summary": "Prepare",
+        "tags": [
+          "conversation"
+        ]
+      }
+    },
+    "/api/v1/me/conversation-sessions/{identifier}": {
+      "get": {
+        "operationId": "getConversationSession",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "identifier",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Identifier",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SessionView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "default": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Request error"
+          }
+        },
+        "security": [
+          {
+            "Auth0AccessToken": []
+          }
+        ],
+        "summary": "Get Session",
+        "tags": [
+          "conversation"
+        ]
+      }
+    },
+    "/api/v1/me/conversation-sessions/{identifier}/abandon": {
+      "post": {
+        "operationId": "abandonConversationSession",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "identifier",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Identifier",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "Idempotency-Key",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Idempotency-Key",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SessionVersion"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SessionView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "default": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Request error"
+          }
+        },
+        "security": [
+          {
+            "Auth0AccessToken": []
+          }
+        ],
+        "summary": "Abandon",
+        "tags": [
+          "conversation"
+        ]
+      }
+    },
     "/api/v1/me/lesson-jobs/{job_id}": {
       "get": {
         "operationId": "getLessonJob",
@@ -2119,6 +2562,86 @@
         "summary": "Attempt",
         "tags": [
           "learning"
+        ]
+      }
+    },
+    "/api/v1/me/mcp-access": {
+      "get": {
+        "operationId": "getMcpAccess",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/McpAccessView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "default": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Request error"
+          }
+        },
+        "security": [
+          {
+            "Auth0AccessToken": []
+          }
+        ],
+        "summary": "Get Access",
+        "tags": [
+          "conversation"
+        ]
+      },
+      "put": {
+        "operationId": "setMcpAccess",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/McpAccessView"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/McpAccessView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "default": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Request error"
+          }
+        },
+        "security": [
+          {
+            "Auth0AccessToken": []
+          }
+        ],
+        "summary": "Put Access",
+        "tags": [
+          "conversation"
         ]
       }
     },

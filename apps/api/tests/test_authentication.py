@@ -31,6 +31,22 @@ async def test_verifies_signature_and_uses_only_trusted_jwks(
     assert len(jwks_endpoint.calls) == 1
 
 
+async def test_cimd_client_is_matched_exactly_against_token_azp(
+    auth_settings: Settings, jwks_endpoint: JwksEndpoint, token_factory: TokenFactory
+) -> None:
+    client = "https://chatgpt.com/oauth/client.json"
+    verifier = Auth0TokenVerifier(auth_settings, allowed_clients=frozenset({client}))
+    principal = await verifier.verify(token_factory({"azp": client}))
+    assert principal.client_id == client
+    for other_client in (
+        "tpc_internal_id",
+        client + "/",
+        "https://chatgpt.com.attacker.test/oauth/client.json",
+    ):
+        with pytest.raises(InvalidCredentials):
+            await verifier.verify(token_factory({"azp": other_client}))
+
+
 @pytest.mark.parametrize(
     "overrides",
     [

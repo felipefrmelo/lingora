@@ -4,6 +4,7 @@ import { WelcomePage } from '../features/welcome/welcome-page'
 import { AccountPage, LearningProfilePage } from '../features/account/account-page'
 import { LearningPage, PreparationPage, PracticePage } from '../features/lessons/pages'
 import { CallbackPage } from '../auth/auth-status'
+import { ConversationsPage, ConversationPage } from '../features/conversation/pages'
 
 
 const rootRoute = createRootRoute({
@@ -24,4 +25,6 @@ const profileRoute = createRoute({ getParentRoute: () => rootRoute, path: '/app/
 const learningRoute = createRoute({ getParentRoute: () => rootRoute, path: '/app/learn', component: LearningPage })
 const jobRoute = createRoute({ getParentRoute: () => rootRoute, path: '/app/learn/jobs/$jobId', component: () => <PreparationPage jobId={jobRoute.useParams().jobId} /> })
 const lessonRoute = createRoute({ getParentRoute: () => rootRoute, path: '/app/lessons/$lessonId', component: () => <PracticePage lessonId={lessonRoute.useParams().lessonId} /> })
-export const routeTree = rootRoute.addChildren([indexRoute, accountRoute, callbackRoute, onboardingRoute, profileRoute, learningRoute, jobRoute, lessonRoute])
+const sessionsRoute = createRoute({ getParentRoute: () => rootRoute, path: '/app/sessions', component: ConversationsPage })
+const sessionRoute = createRoute({ getParentRoute: () => rootRoute, path: '/app/sessions/$sessionId', component: () => <ConversationPage id={sessionRoute.useParams().sessionId} /> })
+export const routeTree = rootRoute.addChildren([indexRoute, accountRoute, callbackRoute, onboardingRoute, profileRoute, learningRoute, jobRoute, lessonRoute, sessionsRoute, sessionRoute])

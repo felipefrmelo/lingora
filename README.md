@@ -2,7 +2,7 @@
 
 English practice inspired by your world. Lingora will organize personalized lessons, exercises, learning evidence, and progress; ChatGPT will provide conversational practice through MCP.
 
-**Current delivery: Milestone 4 — Content and Lessons.** Learners can explore attributed licensed news briefs, prepare private lessons with five exercise types, and save deterministically graded practice. Auth0 and onboarding remain intact. Run a separate worker for generation; see the [lesson guide](docs/lessons.md) and [verification report](docs/lessons-verification.md). Real development acceptance passed on 2026-11-05; [PR #3](https://github.com/felipefrmelo/lingora/pull/3) is available for review. MCP conversation and adaptive learning are later milestones.
+**Current delivery: Milestone 5 — MCP and ChatGPT (in progress).** Learners can prepare conversation sessions from saved lessons and review persisted feedback. The MCP listener and Auth0 connection still require real text and voice acceptance; see the [conversation guide](docs/conversation.md). Earlier lesson behavior and acceptance are documented in the [lesson guide](docs/lessons.md) and [verification report](docs/lessons-verification.md). Adaptive learning remains a later milestone.
 
 ## Prerequisites
 
